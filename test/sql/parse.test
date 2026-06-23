@@ -1,0 +1,89 @@
+# name: test/sql/parse.test
+# group: [vgi_useragent]
+#
+# End-to-end: drive the compiled useragent worker through DuckDB. Scalar
+# accessors (ua_browser/ua_os/ua_device/ua_is_bot) and the one-shot ua_parse
+# STRUCT, over a small VALUES table of well-known UA strings. Assertions use
+# stable families (not exact versions). ORDER BY for determinism.
+
+require-env VGI_USERAGENT_WORKER
+
+statement ok
+LOAD vgi;
+
+statement ok
+ATTACH 'useragent' AS useragent (TYPE vgi, LOCATION '${VGI_USERAGENT_WORKER}');
+
+statement ok
+SET search_path = 'useragent.main';
+
+# ua_browser / ua_os on a Chrome-on-Windows UA.
+query TT
+SELECT ua_browser('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36') AS browser,
+       ua_os('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36') AS os;
+----
+Chrome	Windows
+
+# ua_os / ua_device on an iPhone Safari UA.
+query TT
+SELECT ua_os('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1') AS os,
+       ua_device('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1') AS device;
+----
+iOS	iPhone
+
+# ua_is_bot: Googlebot is a bot, Chrome is not.
+query I
+SELECT ua_is_bot('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)');
+----
+true
+
+query I
+SELECT ua_is_bot('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+----
+false
+
+# NULL / empty / garbage input → NULL fields (not a panic, not 'Other').
+query TTI
+SELECT ua_browser(NULL) AS b, ua_os('') AS o, ua_is_bot('garbage') AS bot;
+----
+NULL	NULL	false
+
+# ua_parse STRUCT field access via (ua_parse(ua)).field over a VALUES table.
+query TTTI
+WITH uas(ua) AS (
+  VALUES
+    ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'),
+    ('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'),
+    ('Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'),
+    ('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')
+)
+SELECT (ua_parse(ua)).os AS os,
+       (ua_parse(ua)).device AS device,
+       (ua_parse(ua)).brand AS brand,
+       (ua_parse(ua)).is_bot AS is_bot
+FROM uas
+ORDER BY os NULLS FIRST, device NULLS FIRST;
+----
+NULL	NULL	NULL	true
+Android	Pixel 7	Google	false
+Windows	NULL	NULL	false
+iOS	iPhone	Apple	false
+
+# ua_parse browser fields on the Chrome UA.
+query TI
+SELECT (ua_parse('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')).browser AS browser,
+       (ua_parse('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')).is_bot AS is_bot;
+----
+Chrome	false
+
+# NULL input → NULL struct row → NULL fields.
+query TI
+SELECT (ua_parse(NULL)).os AS os, (ua_parse(NULL)).is_bot AS is_bot;
+----
+NULL	NULL
+
+statement ok
+USE memory;
+
+statement ok
+DETACH useragent;
