@@ -4,7 +4,9 @@
 
 <p align="center"><em>A <a href="https://query.farm">Query.Farm</a> VGI worker for DuckDB.</em></p>
 
-# vgi-useragent
+# Parse User-Agent Strings to Browser, OS & Device in DuckDB
+
+> **vgi-useragent** · a [Query.Farm](https://query.farm) VGI worker · powered by uap-core
 
 A [VGI](https://query.farm) worker (Rust, a compiled binary) that brings
 **HTTP User-Agent parsing** to DuckDB / SQL over Apache Arrow. DuckDB launches
