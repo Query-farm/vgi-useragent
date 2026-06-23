@@ -1,3 +1,9 @@
+<p align="center">
+  <img src="docs/vgi-logo.png" alt="Vector Gateway Interface (VGI)" width="320">
+</p>
+
+<p align="center"><em>A <a href="https://query.farm">Query.Farm</a> VGI worker for DuckDB.</em></p>
+
 # vgi-useragent
 
 A [VGI](https://query.farm) worker (Rust, a compiled binary) that brings
@@ -88,3 +94,12 @@ make test-sql                    # DuckDB sqllogictest E2E (needs haybarn-unitte
 The SQL E2E suite drives the compiled worker through DuckDB via
 `haybarn-unittest` (`uv tool install haybarn-unittest`; ensure
 `~/.local/bin` is on `PATH`).
+
+---
+
+## Authorship & License
+
+Written by [Query.Farm](https://query.farm) — every VGI worker is designed and built by Query.Farm.
+
+Copyright 2026 Query Farm LLC - https://query.farm
+
