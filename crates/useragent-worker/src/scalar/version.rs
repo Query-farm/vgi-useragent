@@ -26,6 +26,15 @@ impl ScalarFunction for UseragentVersion {
                 description: "Return the useragent worker version string.".into(),
                 expected_output: None,
             }],
+            tags: crate::meta::object_tags(
+                "User-Agent Worker Version",
+                "Return the semantic version string of the running useragent worker binary. Use \
+                 it to confirm which build of the parser and embedded uap-core regex database is \
+                 attached.",
+                "Return the useragent worker version string, e.g. `useragent_version()`.",
+                "version, useragent_version, worker version, build, semver, diagnostics",
+                "scalar/version.rs",
+            ),
             ..Default::default()
         }
     }

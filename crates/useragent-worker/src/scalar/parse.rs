@@ -17,6 +17,33 @@ use vgi_rpc::{Result, RpcError};
 use crate::arrow_io::{parse_struct_fields, parse_struct_type, text_str};
 use crate::useragent;
 
+/// Guaranteed-runnable, catalog-qualified examples (VGI509). Each `sql` is
+/// self-contained and re-runnable against an attached `useragent` worker. We
+/// omit `expected_result` deliberately — the linter only needs each query to
+/// execute cleanly, and uap-core version numbers drift across releases.
+const EXECUTABLE_EXAMPLES: &str = r#"[
+  {
+    "description": "Extract the browser family from a desktop Chrome User-Agent.",
+    "sql": "SELECT useragent.main.ua_browser('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36') AS browser"
+  },
+  {
+    "description": "Extract the operating system from an iPhone Safari User-Agent.",
+    "sql": "SELECT useragent.main.ua_os('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1') AS os"
+  },
+  {
+    "description": "Detect that the Googlebot crawler is a bot.",
+    "sql": "SELECT useragent.main.ua_is_bot('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)') AS is_bot"
+  },
+  {
+    "description": "Parse every field of a Chrome-on-Windows User-Agent at once.",
+    "sql": "SELECT useragent.main.ua_parse('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36') AS parsed"
+  },
+  {
+    "description": "Report the running worker version string.",
+    "sql": "SELECT useragent.main.useragent_version() AS version"
+  }
+]"#;
+
 pub struct UaParse;
 
 impl ScalarFunction for UaParse {
@@ -25,20 +52,34 @@ impl ScalarFunction for UaParse {
     }
 
     fn metadata(&self) -> FunctionMetadata {
+        let mut tags = crate::meta::object_tags(
+            "Parse User-Agent Fields",
+            "Parse an HTTP User-Agent string into a STRUCT of all of its components at once: \
+             browser family and version, operating-system family and version, device family and \
+             brand, and an is_bot flag for spiders/crawlers. NULL, empty, or unparseable input \
+             yields a NULL struct row.",
+            "Parse a User-Agent into `STRUCT(browser, browser_version, os, os_version, device, \
+             brand, is_bot)` in one pass; NULL/unparseable input → NULL row.",
+            "ua_parse, parse user-agent, user agent struct, browser, os, device, brand, is_bot, \
+             one-shot parse, struct",
+            "scalar/parse.rs",
+        );
+        tags.push(("vgi.executable_examples".into(), EXECUTABLE_EXAMPLES.into()));
         FunctionMetadata {
             description: "Parse a User-Agent into STRUCT(browser, browser_version, os, \
                           os_version, device, brand, is_bot); NULL/unparseable → NULL row"
                 .into(),
             examples: vec![FunctionExample {
-                sql: "SELECT (useragent.main.ua_parse('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 \
+                sql: "SELECT useragent.main.ua_parse('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 \
                       like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 \
-                      Mobile/15E148 Safari/604.1')).*;"
+                      Mobile/15E148 Safari/604.1') AS parsed;"
                     .into(),
                 description: "Parse an iPhone Safari User-Agent into all of its fields at once \
                               (browser, OS, device, brand, is_bot)."
                     .into(),
                 expected_output: None,
             }],
+            tags,
             ..Default::default()
         }
     }

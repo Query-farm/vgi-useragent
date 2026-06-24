@@ -96,6 +96,77 @@ impl Field {
         }
     }
 
+    /// The five standard per-object discovery/description tags for this field's
+    /// scalar (VGI112/113/124/126/128). The title carries an extra word beyond
+    /// the machine name so it never normalize-equals it (VGI125).
+    fn object_tags(self) -> Vec<(String, String)> {
+        let (title, description_llm, description_md, keywords) = match self {
+            Field::Browser => (
+                "Browser Family Name",
+                "Extract the browser/client family (e.g. 'Chrome', 'Safari', 'Firefox') from an \
+                 HTTP User-Agent string. Returns NULL when the User-Agent is NULL, empty, or the \
+                 browser cannot be identified.",
+                "Extract the browser family from a User-Agent, e.g. `ua_browser(ua)` → 'Chrome'.",
+                "browser, client, browser family, chrome, safari, firefox, edge, ua_browser, \
+                 user-agent",
+            ),
+            Field::BrowserVersion => (
+                "Browser Version String",
+                "Extract the browser/client version (e.g. '120.0.0') from an HTTP User-Agent \
+                 string, assembled as a dotted major.minor.patch string. Returns NULL when the \
+                 User-Agent is NULL, empty, or no version is present.",
+                "Extract the browser version from a User-Agent, e.g. `ua_browser_version(ua)`.",
+                "browser version, client version, version number, ua_browser_version, user-agent",
+            ),
+            Field::Os => (
+                "Operating System Name",
+                "Extract the operating-system family (e.g. 'Windows', 'iOS', 'Android', 'macOS') \
+                 from an HTTP User-Agent string. Returns NULL when the User-Agent is NULL, empty, \
+                 or the OS cannot be identified.",
+                "Extract the operating-system family from a User-Agent, e.g. `ua_os(ua)` → \
+                 'Windows'.",
+                "os, operating system, platform, windows, ios, android, macos, linux, ua_os, \
+                 user-agent",
+            ),
+            Field::OsVersion => (
+                "Operating System Version",
+                "Extract the operating-system version (e.g. '17.0', '10') from an HTTP User-Agent \
+                 string, assembled as a dotted version string. Returns NULL when the User-Agent \
+                 is NULL, empty, or no OS version is present.",
+                "Extract the operating-system version from a User-Agent, e.g. \
+                 `ua_os_version(ua)`.",
+                "os version, operating system version, platform version, ua_os_version, \
+                 user-agent",
+            ),
+            Field::Device => (
+                "Device Family Model",
+                "Extract the device family/model (e.g. 'iPhone', 'Pixel 7') from an HTTP \
+                 User-Agent string. Returns NULL for generic desktops, bots, or when the device \
+                 cannot be identified.",
+                "Extract the device family from a User-Agent, e.g. `ua_device(ua)` → 'iPhone'.",
+                "device, device family, model, phone, tablet, iphone, pixel, ua_device, \
+                 user-agent",
+            ),
+            Field::DeviceBrand => (
+                "Device Brand Maker",
+                "Extract the device brand/manufacturer (e.g. 'Apple', 'Samsung', 'Google') from \
+                 an HTTP User-Agent string. Returns NULL for generic desktops, bots, or when the \
+                 brand cannot be identified.",
+                "Extract the device brand from a User-Agent, e.g. `ua_device_brand(ua)` → \
+                 'Apple'.",
+                "device brand, manufacturer, maker, apple, samsung, google, ua_device_brand, \
+                 user-agent",
+            ),
+        };
+        crate::meta::object_tags(
+            title,
+            description_llm,
+            description_md,
+            keywords,
+            "scalar/fields.rs",
+        )
+    }
+
     fn extract(self, ua: &str) -> Option<String> {
         match self {
             Field::Browser => useragent::browser(ua),
@@ -142,6 +213,7 @@ impl ScalarFunction for UaField {
             description: self.0.description().into(),
             return_type: Some(DataType::Utf8),
             examples: vec![self.0.example()],
+            tags: self.0.object_tags(),
             ..Default::default()
         }
     }
@@ -197,6 +269,17 @@ impl ScalarFunction for UaIsBot {
                     "Detect that the Googlebot crawler User-Agent is a bot (returns true).".into(),
                 expected_output: None,
             }],
+            tags: crate::meta::object_tags(
+                "Detect Bot Crawler",
+                "Return TRUE when an HTTP User-Agent string identifies a spider/crawler/bot (e.g. \
+                 Googlebot, Bingbot), and FALSE for ordinary browsers. NULL input yields NULL. \
+                 Use it to filter automated traffic out of web analytics.",
+                "Test whether a User-Agent is a bot/crawler, e.g. `ua_is_bot(ua)` → true for \
+                 Googlebot.",
+                "bot, crawler, spider, googlebot, bingbot, robot, automated traffic, filter, \
+                 ua_is_bot, user-agent",
+                "scalar/fields.rs",
+            ),
             ..Default::default()
         }
     }

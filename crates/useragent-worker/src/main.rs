@@ -19,6 +19,7 @@
 //! adapters over it. The parser is compiled exactly once per process.
 
 mod arrow_io;
+mod meta;
 mod scalar;
 mod useragent;
 
@@ -41,6 +42,16 @@ fn catalog_metadata(name: &str) -> CatalogModel {
             "HTTP User-Agent parsing: browser / OS / device + bot detection.".to_string(),
         ),
         tags: vec![
+            (
+                "vgi.title".to_string(),
+                "HTTP User-Agent Parsing & Bot Detection".to_string(),
+            ),
+            (
+                "vgi.keywords".to_string(),
+                "useragent, user-agent, user agent, UA, browser, operating system, OS, device, \
+                 device brand, bot, crawler, spider, web analytics, traffic, parse, uap-core"
+                    .to_string(),
+            ),
             (
                 "vgi.description_llm".to_string(),
                 "Parse HTTP User-Agent header strings into their browser/client, operating \
@@ -78,6 +89,23 @@ fn catalog_metadata(name: &str) -> CatalogModel {
             name: "main".to_string(),
             comment: Some("User-Agent parsing and bot-detection functions.".to_string()),
             tags: vec![
+                ("vgi.title".to_string(), "User-Agent — main".to_string()),
+                (
+                    "vgi.keywords".to_string(),
+                    "useragent, user-agent, browser, os, operating system, device, device brand, \
+                     bot, crawler, spider, ua_browser, ua_os, ua_device, ua_is_bot, ua_parse, \
+                     web analytics"
+                        .to_string(),
+                ),
+                // VGI123 classifying tags (bare keys: domain/category/topic) for faceting.
+                ("domain".to_string(), "web-analytics".to_string()),
+                ("category".to_string(), "parsing".to_string()),
+                ("topic".to_string(), "user-agent-detection".to_string()),
+                (
+                    "vgi.source_url".to_string(),
+                    "https://github.com/Query-farm/vgi-useragent/blob/main/crates/useragent-worker/src/main.rs"
+                        .to_string(),
+                ),
                 (
                     "vgi.description_llm".to_string(),
                     "User-Agent parsing and bot-detection functions: extract the browser, OS, \
@@ -88,6 +116,21 @@ fn catalog_metadata(name: &str) -> CatalogModel {
                 (
                     "vgi.description_md".to_string(),
                     "User-Agent parsing and bot-detection functions over Apache Arrow.".to_string(),
+                ),
+                // VGI506 representative example queries for the schema.
+                (
+                    "vgi.example_queries".to_string(),
+                    "SELECT useragent.main.ua_browser('Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
+                     AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');\n\
+                     SELECT useragent.main.ua_os('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like \
+                     Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 \
+                     Mobile/15E148 Safari/604.1');\n\
+                     SELECT useragent.main.ua_is_bot('Mozilla/5.0 (compatible; Googlebot/2.1; \
+                     +http://www.google.com/bot.html)');\n\
+                     SELECT useragent.main.ua_parse('Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
+                     AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36') \
+                     AS parsed;"
+                        .to_string(),
                 ),
             ],
             views: Vec::new(),
