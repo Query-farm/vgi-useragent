@@ -13,7 +13,10 @@ use std::sync::Arc;
 use arrow_array::builder::{BooleanBuilder, StringBuilder};
 use arrow_array::{ArrayRef, RecordBatch};
 use arrow_schema::DataType;
-use vgi::{ArgSpec, BindParams, BindResponse, FunctionMetadata, ProcessParams, ScalarFunction};
+use vgi::{
+    ArgSpec, BindParams, BindResponse, FunctionExample, FunctionMetadata, ProcessParams,
+    ScalarFunction,
+};
 use vgi_rpc::{Result, RpcError};
 
 use crate::arrow_io::text_str;
@@ -52,6 +55,44 @@ impl Field {
             Field::OsVersion => "Operating-system version from a User-Agent (e.g. '17.0'), or NULL",
             Field::Device => "Device family/model from a User-Agent (e.g. 'iPhone'), or NULL",
             Field::DeviceBrand => "Device brand from a User-Agent (e.g. 'Apple'), or NULL",
+        }
+    }
+
+    /// A worked example query for this field's scalar, used by `vgi-lint`.
+    fn example(self) -> FunctionExample {
+        // A common desktop Chrome-on-Windows User-Agent, reused across fields.
+        const CHROME_WIN: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 \
+             (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+        let (fn_name, description) = match self {
+            Field::Browser => (
+                "ua_browser",
+                "Extract the browser family ('Chrome') from a User-Agent.",
+            ),
+            Field::BrowserVersion => (
+                "ua_browser_version",
+                "Extract the browser version ('120.0.0') from a User-Agent.",
+            ),
+            Field::Os => (
+                "ua_os",
+                "Extract the operating-system family ('Windows') from a User-Agent.",
+            ),
+            Field::OsVersion => (
+                "ua_os_version",
+                "Extract the operating-system version ('10') from a User-Agent.",
+            ),
+            Field::Device => (
+                "ua_device",
+                "Extract the device family from a User-Agent (NULL for a generic desktop).",
+            ),
+            Field::DeviceBrand => (
+                "ua_device_brand",
+                "Extract the device brand from a User-Agent (NULL for a generic desktop).",
+            ),
+        };
+        FunctionExample {
+            sql: format!("SELECT useragent.main.{fn_name}('{CHROME_WIN}');"),
+            description: description.to_string(),
+            expected_output: None,
         }
     }
 
@@ -100,6 +141,7 @@ impl ScalarFunction for UaField {
         FunctionMetadata {
             description: self.0.description().into(),
             return_type: Some(DataType::Utf8),
+            examples: vec![self.0.example()],
             ..Default::default()
         }
     }
@@ -147,6 +189,14 @@ impl ScalarFunction for UaIsBot {
                           NULL in → NULL out"
                     .into(),
             return_type: Some(DataType::Boolean),
+            examples: vec![FunctionExample {
+                sql: "SELECT useragent.main.ua_is_bot('Mozilla/5.0 (compatible; Googlebot/2.1; \
+                      +http://www.google.com/bot.html)');"
+                    .into(),
+                description:
+                    "Detect that the Googlebot crawler User-Agent is a bot (returns true).".into(),
+                expected_output: None,
+            }],
             ..Default::default()
         }
     }
