@@ -53,20 +53,28 @@ fn catalog_metadata(name: &str) -> CatalogModel {
                     .to_string(),
             ),
             (
-                "vgi.description_llm".to_string(),
-                "Parse HTTP User-Agent header strings into their browser/client, operating \
-                 system, and device components, and detect spiders/crawlers (bots). Extract a \
-                 single field (browser, browser version, OS, OS version, device, device brand), \
-                 test whether a User-Agent is a bot, or get every field at once as a STRUCT. \
-                 Use for web-analytics enrichment, traffic segmentation, and bot filtering in SQL."
+                "vgi.doc_llm".to_string(),
+                "## useragent worker\n\nParses HTTP `User-Agent` header strings into their \
+                 **browser/client**, **operating-system**, and **device** components, and \
+                 detects **spiders/crawlers (bots)** — all over Apache Arrow inside DuckDB.\n\n\
+                 **What you can do:** extract a single field (browser, browser version, OS, OS \
+                 version, device, device brand), test whether a User-Agent is a bot, or get every \
+                 field at once as a `STRUCT` via `ua_parse`.\n\n**When to use:** web-analytics \
+                 enrichment, traffic segmentation by client/platform/device, and bot filtering in \
+                 SQL.\n\n**Behavior:** all scalars are arity-1 (`ua VARCHAR`); `NULL`/empty/\
+                 unidentifiable input yields `NULL` (never the literal `'Other'`). Parsing is \
+                 backed by the embedded uap-core regex database."
                     .to_string(),
             ),
             (
-                "vgi.description_md".to_string(),
-                "# useragent\n\nHTTP User-Agent parsing (browser / OS / device + bot detection) \
-                 over Apache Arrow, backed by the uap-core regex database.\n\nScalars: \
-                 `ua_browser`, `ua_browser_version`, `ua_os`, `ua_os_version`, `ua_device`, \
-                 `ua_device_brand`, `ua_is_bot`, `ua_parse`, `useragent_version`."
+                "vgi.doc_md".to_string(),
+                "# useragent\n\nHTTP User-Agent parsing — browser / OS / device plus bot \
+                 detection — over Apache Arrow, backed by the uap-core regex database.\n\n\
+                 ## Functions\n\n- `ua_browser`, `ua_browser_version`\n- `ua_os`, \
+                 `ua_os_version`\n- `ua_device`, `ua_device_brand`\n- `ua_is_bot` (BOOLEAN)\n- \
+                 `ua_parse` (STRUCT of all fields)\n- `useragent_version`\n\n## Notes\n\nAll \
+                 accessors take a single `ua VARCHAR` argument and return NULL for \
+                 unknown/empty input."
                     .to_string(),
             ),
             ("vgi.author".to_string(), "Query.Farm".to_string()),
@@ -107,15 +115,22 @@ fn catalog_metadata(name: &str) -> CatalogModel {
                         .to_string(),
                 ),
                 (
-                    "vgi.description_llm".to_string(),
-                    "User-Agent parsing and bot-detection functions: extract the browser, OS, \
-                     and device from a User-Agent string, detect spiders/crawlers, or parse all \
-                     fields at once into a STRUCT."
+                    "vgi.doc_llm".to_string(),
+                    "## useragent.main\n\nThe schema holding the User-Agent parsing and \
+                     bot-detection functions. Extract the browser, OS, or device from a \
+                     `User-Agent` string with the single-field `ua_*` accessors, detect \
+                     spiders/crawlers with `ua_is_bot`, or parse every field at once into a \
+                     `STRUCT` with `ua_parse`. Use these for web-analytics enrichment and traffic \
+                     segmentation."
                         .to_string(),
                 ),
                 (
-                    "vgi.description_md".to_string(),
-                    "User-Agent parsing and bot-detection functions over Apache Arrow.".to_string(),
+                    "vgi.doc_md".to_string(),
+                    "# useragent.main\n\nUser-Agent parsing and bot-detection functions over \
+                     Apache Arrow.\n\nIncludes the single-field accessors (`ua_browser`, `ua_os`, \
+                     `ua_device`, …), the `ua_is_bot` predicate, and the one-shot `ua_parse` \
+                     STRUCT function."
+                        .to_string(),
                 ),
                 // VGI506 representative example queries for the schema.
                 (

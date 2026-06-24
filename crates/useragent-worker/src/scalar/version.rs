@@ -28,10 +28,18 @@ impl ScalarFunction for UseragentVersion {
             }],
             tags: crate::meta::object_tags(
                 "User-Agent Worker Version",
-                "Return the semantic version string of the running useragent worker binary. Use \
-                 it to confirm which build of the parser and embedded uap-core regex database is \
-                 attached.",
-                "Return the useragent worker version string, e.g. `useragent_version()`.",
+                "## useragent_version\n\nReturns the **semantic version string** of the running \
+                 `useragent` worker binary as a `VARCHAR`.\n\n**When to use:** confirm which \
+                 build of the parser (and the embedded uap-core regex database) is attached, \
+                 capture provenance in audit logs, or assert a minimum version before relying on \
+                 a feature.\n\n**Input:** none — this is a zero-argument scalar.\n**Output:** a \
+                 version string such as `0.1.0`, taken from the crate's `CARGO_PKG_VERSION` at \
+                 compile time.\n\n**Edge cases:** always returns a value; it never depends on \
+                 input and never returns `NULL`.",
+                "# Worker version\n\n`useragent_version()` returns the worker binary's semantic \
+                 version.\n\n## Usage\n\n```sql\nSELECT useragent_version();\n-- '0.1.0'\n```\n\n\
+                 ## Notes\n\n- Zero-argument scalar; always non-NULL.\n- Useful for diagnostics \
+                 and provenance.",
                 "version, useragent_version, worker version, build, semver, diagnostics",
                 "scalar/version.rs",
             ),

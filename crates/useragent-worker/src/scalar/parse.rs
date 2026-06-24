@@ -54,12 +54,25 @@ impl ScalarFunction for UaParse {
     fn metadata(&self) -> FunctionMetadata {
         let mut tags = crate::meta::object_tags(
             "Parse User-Agent Fields",
-            "Parse an HTTP User-Agent string into a STRUCT of all of its components at once: \
-             browser family and version, operating-system family and version, device family and \
-             brand, and an is_bot flag for spiders/crawlers. NULL, empty, or unparseable input \
-             yields a NULL struct row.",
-            "Parse a User-Agent into `STRUCT(browser, browser_version, os, os_version, device, \
-             brand, is_bot)` in one pass; NULL/unparseable input → NULL row.",
+            "## ua_parse\n\nParses an HTTP `User-Agent` string into a **single `STRUCT`** \
+             containing every component at once, in one pass over the input.\n\n**Returned \
+             struct fields:**\n\n- `browser` (VARCHAR) — client family\n- `browser_version` \
+             (VARCHAR) — dotted client version\n- `os` (VARCHAR) — operating-system family\n- \
+             `os_version` (VARCHAR) — dotted OS version\n- `device` (VARCHAR) — device \
+             family/model\n- `brand` (VARCHAR) — device brand/manufacturer\n- `is_bot` (BOOLEAN) \
+             — spider/crawler flag\n\n**When to use:** prefer `ua_parse` over calling the \
+             individual `ua_*` accessors when you need several fields, since it parses the string \
+             only once. Project with `(ua_parse(ua)).*` or pick fields like \
+             `(ua_parse(ua)).os`.\n\n**Edge cases:** `NULL`, empty, or unparseable input yields \
+             a `NULL` struct row. For bots, `device` and `brand` are suppressed to `NULL` while \
+             `is_bot` is `TRUE`. Unidentified individual fields are `NULL` rather than `'Other'`.",
+            "# Parse all fields\n\n`ua_parse(ua)` returns a STRUCT with every parsed User-Agent \
+             field in one pass.\n\n## Usage\n\n```sql\n-- Explode all fields\nSELECT \
+             (ua_parse(ua)).* FROM hits;\n\n-- Pick a couple\nSELECT (ua_parse(ua)).browser, \
+             (ua_parse(ua)).os FROM hits;\n```\n\n## Struct shape\n\n`STRUCT(browser, \
+             browser_version, os, os_version, device, brand, is_bot)`\n\n## Notes\n\n- More \
+             efficient than calling each `ua_*` accessor separately.\n- NULL/unparseable input → \
+             NULL row.",
             "ua_parse, parse user-agent, user agent struct, browser, os, device, brand, is_bot, \
              one-shot parse, struct",
             "scalar/parse.rs",

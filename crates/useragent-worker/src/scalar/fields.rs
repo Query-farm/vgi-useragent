@@ -100,71 +100,119 @@ impl Field {
     /// scalar (VGI112/113/124/126/128). The title carries an extra word beyond
     /// the machine name so it never normalize-equals it (VGI125).
     fn object_tags(self) -> Vec<(String, String)> {
-        let (title, description_llm, description_md, keywords) = match self {
+        let (title, doc_llm, doc_md, keywords) = match self {
             Field::Browser => (
                 "Browser Family Name",
-                "Extract the browser/client family (e.g. 'Chrome', 'Safari', 'Firefox') from an \
-                 HTTP User-Agent string. Returns NULL when the User-Agent is NULL, empty, or the \
-                 browser cannot be identified.",
-                "Extract the browser family from a User-Agent, e.g. `ua_browser(ua)` → 'Chrome'.",
+                "## ua_browser\n\nExtracts the **browser / client family** from an HTTP \
+                 `User-Agent` header string and returns it as a `VARCHAR`.\n\n**When to use:** \
+                 segment web-analytics traffic by browser, build top-browser reports, or filter \
+                 rows to a specific client. Pair with `ua_browser_version` for the full client \
+                 identity.\n\n**Input:** one `ua VARCHAR` column or literal (positional, \
+                 arity-1).\n**Output:** the family name such as `Chrome`, `Safari`, `Firefox`, \
+                 `Edge`, or `Mobile Safari`.\n\n**Edge cases:** `NULL`, empty, or unidentifiable \
+                 input returns `NULL` (never the literal `'Other'`). Identification comes from \
+                 the embedded uap-core regex database, so very new or obscure clients may not \
+                 match.",
+                "# Browser family\n\n`ua_browser(ua)` returns the browser/client family parsed \
+                 from a User-Agent string.\n\n## Usage\n\n```sql\nSELECT ua_browser(ua) AS \
+                 browser FROM hits;\n-- 'Chrome', 'Safari', 'Firefox', …\n```\n\n## Notes\n\n- \
+                 NULL/empty/unknown input yields NULL.\n- Use `ua_browser_version` for the \
+                 version component.",
                 "browser, client, browser family, chrome, safari, firefox, edge, ua_browser, \
                  user-agent",
             ),
             Field::BrowserVersion => (
                 "Browser Version String",
-                "Extract the browser/client version (e.g. '120.0.0') from an HTTP User-Agent \
-                 string, assembled as a dotted major.minor.patch string. Returns NULL when the \
-                 User-Agent is NULL, empty, or no version is present.",
-                "Extract the browser version from a User-Agent, e.g. `ua_browser_version(ua)`.",
+                "## ua_browser_version\n\nExtracts the **browser / client version** from an HTTP \
+                 `User-Agent` header and returns it as a dotted `VARCHAR` (for example \
+                 `120.0.0`).\n\n**When to use:** track adoption of browser releases, gate \
+                 features by minimum version, or detect outdated clients in web-analytics \
+                 data.\n\n**Input:** one `ua VARCHAR` column or literal.\n**Output:** a \
+                 `major.minor.patch` string assembled from the components uap-core reports; only \
+                 the leading run of present components is kept.\n\n**Edge cases:** `NULL`, empty, \
+                 unparseable, or version-less input returns `NULL`. Version numbers track the \
+                 embedded uap-core database and can drift across releases, so prefer ranges over \
+                 exact-equality comparisons.",
+                "# Browser version\n\n`ua_browser_version(ua)` returns the dotted browser version \
+                 parsed from a User-Agent string.\n\n## Usage\n\n```sql\nSELECT \
+                 ua_browser_version(ua) AS ver FROM hits;\n-- '120.0.0'\n```\n\n## Notes\n\n- \
+                 NULL/empty/version-less input yields NULL.\n- Versions may drift with uap-core \
+                 updates; compare with ranges, not exact equality.",
                 "browser version, client version, version number, ua_browser_version, user-agent",
             ),
             Field::Os => (
                 "Operating System Name",
-                "Extract the operating-system family (e.g. 'Windows', 'iOS', 'Android', 'macOS') \
-                 from an HTTP User-Agent string. Returns NULL when the User-Agent is NULL, empty, \
-                 or the OS cannot be identified.",
-                "Extract the operating-system family from a User-Agent, e.g. `ua_os(ua)` → \
-                 'Windows'.",
+                "## ua_os\n\nExtracts the **operating-system family** from an HTTP `User-Agent` \
+                 header and returns it as a `VARCHAR`.\n\n**When to use:** break web traffic down \
+                 by platform (Windows vs. iOS vs. Android), build OS-mix dashboards, or filter \
+                 rows by platform. Pair with `ua_os_version` for the full OS identity.\n\n\
+                 **Input:** one `ua VARCHAR` column or literal.\n**Output:** a family name such \
+                 as `Windows`, `iOS`, `Android`, `Mac OS X`, or `Linux`.\n\n**Edge cases:** \
+                 `NULL`, empty, or unidentifiable input returns `NULL` (never `'Other'`).",
+                "# Operating system\n\n`ua_os(ua)` returns the operating-system family parsed \
+                 from a User-Agent string.\n\n## Usage\n\n```sql\nSELECT ua_os(ua) AS os FROM \
+                 hits;\n-- 'Windows', 'iOS', 'Android', …\n```\n\n## Notes\n\n- \
+                 NULL/empty/unknown input yields NULL.\n- Use `ua_os_version` for the version \
+                 component.",
                 "os, operating system, platform, windows, ios, android, macos, linux, ua_os, \
                  user-agent",
             ),
             Field::OsVersion => (
                 "Operating System Version",
-                "Extract the operating-system version (e.g. '17.0', '10') from an HTTP User-Agent \
-                 string, assembled as a dotted version string. Returns NULL when the User-Agent \
-                 is NULL, empty, or no OS version is present.",
-                "Extract the operating-system version from a User-Agent, e.g. \
-                 `ua_os_version(ua)`.",
+                "## ua_os_version\n\nExtracts the **operating-system version** from an HTTP \
+                 `User-Agent` header and returns it as a dotted `VARCHAR` (for example `17.0` or \
+                 `10`).\n\n**When to use:** measure OS upgrade adoption, detect end-of-life \
+                 platforms, or correlate behavior with platform version in web analytics.\n\n\
+                 **Input:** one `ua VARCHAR` column or literal.\n**Output:** a dotted version \
+                 string assembled from the components uap-core reports.\n\n**Edge cases:** \
+                 `NULL`, empty, unparseable, or version-less input returns `NULL`. Values track \
+                 the embedded uap-core database; prefer ranges over exact comparisons.",
+                "# Operating-system version\n\n`ua_os_version(ua)` returns the dotted OS version \
+                 parsed from a User-Agent string.\n\n## Usage\n\n```sql\nSELECT ua_os_version(ua) \
+                 AS os_ver FROM hits;\n-- '17.0', '10'\n```\n\n## Notes\n\n- \
+                 NULL/empty/version-less input yields NULL.\n- Versions may drift with uap-core \
+                 updates.",
                 "os version, operating system version, platform version, ua_os_version, \
                  user-agent",
             ),
             Field::Device => (
                 "Device Family Model",
-                "Extract the device family/model (e.g. 'iPhone', 'Pixel 7') from an HTTP \
-                 User-Agent string. Returns NULL for generic desktops, bots, or when the device \
-                 cannot be identified.",
-                "Extract the device family from a User-Agent, e.g. `ua_device(ua)` → 'iPhone'.",
+                "## ua_device\n\nExtracts the **device family / model** from an HTTP `User-Agent` \
+                 header and returns it as a `VARCHAR` (for example `iPhone` or `Pixel 7`).\n\n\
+                 **When to use:** segment traffic by hardware, build device-popularity reports, \
+                 or distinguish mobile from desktop. Pair with `ua_device_brand` for the \
+                 manufacturer.\n\n**Input:** one `ua VARCHAR` column or literal.\n**Output:** a \
+                 device family/model string.\n\n**Edge cases:** generic desktop browsers, bots, \
+                 and unidentifiable input return `NULL` — desktop User-Agents typically carry no \
+                 device signal. For bots, the device is deliberately suppressed to `NULL` (use \
+                 `ua_is_bot` instead).",
+                "# Device family\n\n`ua_device(ua)` returns the device family/model parsed from a \
+                 User-Agent string.\n\n## Usage\n\n```sql\nSELECT ua_device(ua) AS device FROM \
+                 hits;\n-- 'iPhone', 'Pixel 7'\n```\n\n## Notes\n\n- NULL for generic desktops, \
+                 bots, and unknown devices.\n- Use `ua_device_brand` for the manufacturer.",
                 "device, device family, model, phone, tablet, iphone, pixel, ua_device, \
                  user-agent",
             ),
             Field::DeviceBrand => (
                 "Device Brand Maker",
-                "Extract the device brand/manufacturer (e.g. 'Apple', 'Samsung', 'Google') from \
-                 an HTTP User-Agent string. Returns NULL for generic desktops, bots, or when the \
-                 brand cannot be identified.",
-                "Extract the device brand from a User-Agent, e.g. `ua_device_brand(ua)` → \
-                 'Apple'.",
+                "## ua_device_brand\n\nExtracts the **device brand / manufacturer** from an HTTP \
+                 `User-Agent` header and returns it as a `VARCHAR` (for example `Apple`, \
+                 `Samsung`, or `Google`).\n\n**When to use:** group traffic by vendor, build \
+                 manufacturer market-share reports, or join against a hardware catalog. Pair \
+                 with `ua_device` for the specific model.\n\n**Input:** one `ua VARCHAR` column \
+                 or literal.\n**Output:** the brand/manufacturer name.\n\n**Edge cases:** \
+                 generic desktop browsers, bots, and unidentifiable input return `NULL`; brand \
+                 is suppressed to `NULL` for bots.",
+                "# Device brand\n\n`ua_device_brand(ua)` returns the device brand/manufacturer \
+                 parsed from a User-Agent string.\n\n## Usage\n\n```sql\nSELECT \
+                 ua_device_brand(ua) AS brand FROM hits;\n-- 'Apple', 'Samsung', 'Google'\n```\n\
+                 \n## Notes\n\n- NULL for generic desktops, bots, and unknown brands.\n- Use \
+                 `ua_device` for the specific model.",
                 "device brand, manufacturer, maker, apple, samsung, google, ua_device_brand, \
                  user-agent",
             ),
         };
-        crate::meta::object_tags(
-            title,
-            description_llm,
-            description_md,
-            keywords,
-            "scalar/fields.rs",
-        )
+        crate::meta::object_tags(title, doc_llm, doc_md, keywords, "scalar/fields.rs")
     }
 
     fn extract(self, ua: &str) -> Option<String> {
@@ -271,11 +319,20 @@ impl ScalarFunction for UaIsBot {
             }],
             tags: crate::meta::object_tags(
                 "Detect Bot Crawler",
-                "Return TRUE when an HTTP User-Agent string identifies a spider/crawler/bot (e.g. \
-                 Googlebot, Bingbot), and FALSE for ordinary browsers. NULL input yields NULL. \
-                 Use it to filter automated traffic out of web analytics.",
-                "Test whether a User-Agent is a bot/crawler, e.g. `ua_is_bot(ua)` → true for \
-                 Googlebot.",
+                "## ua_is_bot\n\nReturns a `BOOLEAN` that is `TRUE` when an HTTP `User-Agent` \
+                 string identifies a **spider / crawler / bot** (for example Googlebot, Bingbot, \
+                 or other automated agents) and `FALSE` for ordinary human browsers.\n\n**When \
+                 to use:** filter automated traffic out of web-analytics aggregates, route bot \
+                 requests differently, or compute a human-vs-bot split. A typical pattern is \
+                 `WHERE NOT ua_is_bot(ua)` to keep only real visitors.\n\n**Input:** one `ua \
+                 VARCHAR` column or literal.\n**Output:** `TRUE`/`FALSE`, or `NULL` when the \
+                 input is `NULL`.\n\n**How it works:** detection is driven by the embedded \
+                 uap-core regex database, which classifies crawlers under the device family \
+                 `Spider`. Unrecognized agents are treated as non-bots (`FALSE`).",
+                "# Bot detection\n\n`ua_is_bot(ua)` returns TRUE for spiders/crawlers and FALSE \
+                 for ordinary browsers.\n\n## Usage\n\n```sql\n-- Keep only human traffic\nSELECT \
+                 * FROM hits WHERE NOT ua_is_bot(ua);\n```\n\n## Notes\n\n- NULL input yields \
+                 NULL.\n- Backed by uap-core's `Spider` device family.",
                 "bot, crawler, spider, googlebot, bingbot, robot, automated traffic, filter, \
                  ua_is_bot, user-agent",
                 "scalar/fields.rs",
