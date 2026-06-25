@@ -5,39 +5,42 @@
 //! - `vgi.title` (VGI124)    — human-friendly display name
 //! - `vgi.doc_llm` (VGI112)  — Markdown narrative aimed at LLMs/agents
 //! - `vgi.doc_md` (VGI113)   — Markdown narrative for human docs
-//! - `vgi.keywords` (VGI126) — comma-separated search terms/synonyms
-//! - `vgi.source_url` (VGI128) — link to the implementing source file
+//! - `vgi.keywords` (VGI126) — JSON array of search terms/synonyms
 //!
-//! `source_url(file)` builds the canonical GitHub blob URL for a source file so
-//! every object points at exactly where it is implemented.
+//! Per VGI139, `vgi.source_url` lives only on the catalog object, not on every
+//! function, so it is intentionally not emitted here.
 
-/// Base GitHub blob URL for source files in this repo (pinned to `main`).
-const SOURCE_BASE: &str =
-    "https://github.com/Query-farm/vgi-useragent/blob/main/crates/useragent-worker/src";
-
-/// Build the implementation `vgi.source_url` for a file under
-/// `useragent-worker/src`, e.g. `source_url("scalar/parse.rs")`.
-pub fn source_url(relative_path: &str) -> String {
-    format!("{SOURCE_BASE}/{relative_path}")
+/// Serialize a comma-separated keyword list into the JSON array of strings that
+/// `vgi.keywords` requires (VGI138), e.g. `"a, b"` -> `["a","b"]`. Each keyword
+/// is trimmed and empty entries are dropped.
+pub fn keywords_json(keywords: &str) -> String {
+    let items: Vec<String> = keywords
+        .split(',')
+        .map(|k| k.trim())
+        .filter(|k| !k.is_empty())
+        .map(|k| serde_json::to_string(k).expect("string serializes to JSON"))
+        .collect();
+    format!("[{}]", items.join(","))
 }
 
-/// Build the five standard per-object discovery/description tags.
+/// Build the four standard per-object discovery/description tags.
 ///
-/// `relative_path` is the implementing file relative to `useragent-worker/src`.
-/// `doc_llm` and `doc_md` MUST be distinct Markdown narratives (identical
-/// content is flagged as duplication).
+/// `keywords` is a comma-separated convenience list; it is serialized to the
+/// JSON array form `vgi.keywords` requires (VGI138). `doc_llm` and `doc_md` MUST
+/// be distinct Markdown narratives (identical content is flagged as
+/// duplication). Note: `vgi.source_url` is deliberately omitted here — per
+/// VGI139 it belongs only on the catalog object.
 pub fn object_tags(
     title: &str,
     doc_llm: &str,
     doc_md: &str,
     keywords: &str,
-    relative_path: &str,
+    _relative_path: &str,
 ) -> Vec<(String, String)> {
     vec![
         ("vgi.title".to_string(), title.to_string()),
         ("vgi.doc_llm".to_string(), doc_llm.to_string()),
         ("vgi.doc_md".to_string(), doc_md.to_string()),
-        ("vgi.keywords".to_string(), keywords.to_string()),
-        ("vgi.source_url".to_string(), source_url(relative_path)),
+        ("vgi.keywords".to_string(), keywords_json(keywords)),
     ]
 }

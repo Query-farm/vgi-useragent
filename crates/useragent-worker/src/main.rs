@@ -48,9 +48,11 @@ fn catalog_metadata(name: &str) -> CatalogModel {
             ),
             (
                 "vgi.keywords".to_string(),
-                "useragent, user-agent, user agent, UA, browser, operating system, OS, device, \
-                 device brand, bot, crawler, spider, web analytics, traffic, parse, uap-core"
-                    .to_string(),
+                meta::keywords_json(
+                    "useragent, user-agent, user agent, UA, browser, operating system, OS, \
+                     device, device brand, bot, crawler, spider, web analytics, traffic, parse, \
+                     uap-core",
+                ),
             ),
             (
                 "vgi.doc_llm".to_string(),
@@ -100,20 +102,16 @@ fn catalog_metadata(name: &str) -> CatalogModel {
                 ("vgi.title".to_string(), "User-Agent — main".to_string()),
                 (
                     "vgi.keywords".to_string(),
-                    "useragent, user-agent, browser, os, operating system, device, device brand, \
-                     bot, crawler, spider, ua_browser, ua_os, ua_device, ua_is_bot, ua_parse, \
-                     web analytics"
-                        .to_string(),
+                    meta::keywords_json(
+                        "useragent, user-agent, browser, os, operating system, device, \
+                         device brand, bot, crawler, spider, ua_browser, ua_os, ua_device, \
+                         ua_is_bot, ua_parse, web analytics",
+                    ),
                 ),
                 // VGI123 classifying tags (bare keys: domain/category/topic) for faceting.
                 ("domain".to_string(), "web-analytics".to_string()),
                 ("category".to_string(), "parsing".to_string()),
                 ("topic".to_string(), "user-agent-detection".to_string()),
-                (
-                    "vgi.source_url".to_string(),
-                    "https://github.com/Query-farm/vgi-useragent/blob/main/crates/useragent-worker/src/main.rs"
-                        .to_string(),
-                ),
                 (
                     "vgi.doc_llm".to_string(),
                     "## useragent.main\n\nThe schema holding the User-Agent parsing and \

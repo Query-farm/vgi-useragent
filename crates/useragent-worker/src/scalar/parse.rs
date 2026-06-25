@@ -98,7 +98,12 @@ impl ScalarFunction for UaParse {
     }
 
     fn argument_specs(&self) -> Vec<ArgSpec> {
-        vec![ArgSpec::any_column("ua", 0, "User-Agent string (VARCHAR)")]
+        vec![ArgSpec::any_column(
+            "ua",
+            0,
+            "The HTTP User-Agent header value to parse into all of its components at once \
+             (browser, OS, device, brand, and bot flag).",
+        )]
     }
 
     fn on_bind(&self, _params: &BindParams) -> Result<BindResponse> {

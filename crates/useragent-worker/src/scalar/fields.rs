@@ -267,7 +267,12 @@ impl ScalarFunction for UaField {
     }
 
     fn argument_specs(&self) -> Vec<ArgSpec> {
-        vec![ArgSpec::any_column("ua", 0, "User-Agent string (VARCHAR)")]
+        vec![ArgSpec::any_column(
+            "ua",
+            0,
+            "The HTTP User-Agent header value to parse; the requested field (browser, OS, or \
+             device component) is extracted from it.",
+        )]
     }
 
     fn on_bind(&self, _params: &BindParams) -> Result<BindResponse> {
@@ -342,7 +347,11 @@ impl ScalarFunction for UaIsBot {
     }
 
     fn argument_specs(&self) -> Vec<ArgSpec> {
-        vec![ArgSpec::any_column("ua", 0, "User-Agent string (VARCHAR)")]
+        vec![ArgSpec::any_column(
+            "ua",
+            0,
+            "The HTTP User-Agent header value to test for being a spider/crawler (bot).",
+        )]
     }
 
     fn on_bind(&self, _params: &BindParams) -> Result<BindResponse> {
