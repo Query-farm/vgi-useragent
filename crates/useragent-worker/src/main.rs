@@ -70,13 +70,45 @@ fn catalog_metadata(name: &str) -> CatalogModel {
             ),
             (
                 "vgi.doc_md".to_string(),
-                "# useragent\n\nHTTP User-Agent parsing — browser / OS / device plus bot \
-                 detection — over Apache Arrow, backed by the uap-core regex database.\n\n\
+                "# useragent — HTTP User-Agent Parsing & Bot Detection in SQL\n\n\
+                 Turn raw HTTP `User-Agent` header strings into structured **browser**, \
+                 **operating-system**, and **device** facts — and flag **bots, crawlers, and \
+                 spiders** — directly in DuckDB SQL over Apache Arrow.\n\n\
+                 The `useragent` extension brings production-grade User-Agent parsing to your SQL \
+                 workflow. It is built for web-analytics teams, log-pipeline engineers, and anyone \
+                 who needs to segment HTTP traffic by client, platform, or device without leaving \
+                 the database. Point it at a column of raw `User-Agent` headers and get clean, \
+                 normalized browser / OS / device attributes plus a reliable bot signal — no \
+                 hand-written UDFs, no external services, and no row-by-row API round-trips.\n\n\
+                 Parsing is powered by the community-maintained \
+                 [uap-core](https://github.com/ua-parser/uap-core) regex database — the same \
+                 ruleset behind the cross-language ua-parser project — executed through the Rust \
+                 [`uaparser`](https://docs.rs/uaparser/latest/uaparser/) crate. The full uap-core \
+                 `regexes.yaml` ruleset is embedded into the worker at compile time and compiled \
+                 exactly once per process, so the binary is fully self-contained and matching \
+                 stays fast across millions of rows. Results stream back to DuckDB over Apache \
+                 Arrow. Unidentified families normalize to SQL `NULL` (never the literal \
+                 `'Other'`), and crawlers are recognized via uap-core's `Spider` device \
+                 classification.\n\n\
+                 The function surface is small and composable. Use the single-field accessors \
+                 `ua_browser`, `ua_browser_version`, `ua_os`, `ua_os_version`, `ua_device`, and \
+                 `ua_device_brand` to pull one attribute at a time; call `ua_is_bot` for a \
+                 `BOOLEAN` crawler/spider flag; or call `ua_parse` once to get every field at \
+                 once as a `STRUCT(browser, browser_version, os, os_version, device, brand, \
+                 is_bot)`. `useragent_version` reports the worker build. Every accessor takes a \
+                 single `ua VARCHAR` argument and returns `NULL` for empty or unrecognizable \
+                 input — perfect for `SELECT ua_browser(ua), ua_os(ua) FROM hits` style \
+                 enrichment, traffic segmentation by platform/device, and bot filtering in \
+                 SQL.\n\n\
                  ## Functions\n\n- `ua_browser`, `ua_browser_version`\n- `ua_os`, \
                  `ua_os_version`\n- `ua_device`, `ua_device_brand`\n- `ua_is_bot` (BOOLEAN)\n- \
-                 `ua_parse` (STRUCT of all fields)\n- `useragent_version`\n\n## Notes\n\nAll \
-                 accessors take a single `ua VARCHAR` argument and return NULL for \
-                 unknown/empty input."
+                 `ua_parse` (STRUCT of all fields)\n- `useragent_version`\n\n\
+                 ## Learn more\n\n\
+                 - Source code: [ua-parser/uap-core](https://github.com/ua-parser/uap-core)\n\
+                 - Specification: \
+                 [uap-core spec](https://github.com/ua-parser/uap-core/blob/master/docs/specification.md)\n\
+                 - Rust parser docs: \
+                 [uaparser on docs.rs](https://docs.rs/uaparser/latest/uaparser/)"
                     .to_string(),
             ),
             ("vgi.author".to_string(), "Query.Farm".to_string()),
