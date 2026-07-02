@@ -41,7 +41,7 @@ impl ScalarFunction for UseragentVersion {
                  ## Notes\n\n- Zero-argument scalar; always non-NULL.\n- Useful for diagnostics \
                  and provenance.",
                 "version, useragent_version, worker version, build, semver, diagnostics",
-                "scalar/version.rs",
+                "Diagnostics",
             ),
             ..Default::default()
         }

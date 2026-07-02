@@ -3,3 +3,6 @@
 **/*.rs.bk
 .DS_Store
 /duckdb_unittest_tempdir
+
+# vgi-lint local caches
+.vgi-*-cache.json

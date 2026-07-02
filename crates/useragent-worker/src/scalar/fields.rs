@@ -45,6 +45,15 @@ impl Field {
         }
     }
 
+    /// The `vgi.categories` entry this field's scalar belongs to (VGI413).
+    fn category(self) -> &'static str {
+        match self {
+            Field::Browser | Field::BrowserVersion => "Browser",
+            Field::Os | Field::OsVersion => "Operating System",
+            Field::Device | Field::DeviceBrand => "Device",
+        }
+    }
+
     fn description(self) -> &'static str {
         match self {
             Field::Browser => "Browser/client family from a User-Agent (e.g. 'Chrome'), or NULL",
@@ -212,7 +221,7 @@ impl Field {
                  user-agent",
             ),
         };
-        crate::meta::object_tags(title, doc_llm, doc_md, keywords, "scalar/fields.rs")
+        crate::meta::object_tags(title, doc_llm, doc_md, keywords, self.category())
     }
 
     fn extract(self, ua: &str) -> Option<String> {
@@ -340,7 +349,7 @@ impl ScalarFunction for UaIsBot {
                  NULL.\n- Backed by uap-core's `Spider` device family.",
                 "bot, crawler, spider, googlebot, bingbot, robot, automated traffic, filter, \
                  ua_is_bot, user-agent",
-                "scalar/fields.rs",
+                "Bot Detection",
             ),
             ..Default::default()
         }

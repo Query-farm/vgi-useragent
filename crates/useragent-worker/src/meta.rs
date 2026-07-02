@@ -23,24 +23,27 @@ pub fn keywords_json(keywords: &str) -> String {
     format!("[{}]", items.join(","))
 }
 
-/// Build the four standard per-object discovery/description tags.
+/// Build the standard per-object discovery/description tags.
 ///
 /// `keywords` is a comma-separated convenience list; it is serialized to the
 /// JSON array form `vgi.keywords` requires (VGI138). `doc_llm` and `doc_md` MUST
 /// be distinct Markdown narratives (identical content is flagged as
-/// duplication). Note: `vgi.source_url` is deliberately omitted here — per
-/// VGI139 it belongs only on the catalog object.
+/// duplication). `category` names one of the schema's `vgi.categories` entries
+/// (VGI413) and is emitted as the object's `vgi.category`. Note:
+/// `vgi.source_url` is deliberately omitted here — per VGI139 it belongs only on
+/// the catalog object.
 pub fn object_tags(
     title: &str,
     doc_llm: &str,
     doc_md: &str,
     keywords: &str,
-    _relative_path: &str,
+    category: &str,
 ) -> Vec<(String, String)> {
     vec![
         ("vgi.title".to_string(), title.to_string()),
         ("vgi.doc_llm".to_string(), doc_llm.to_string()),
         ("vgi.doc_md".to_string(), doc_md.to_string()),
         ("vgi.keywords".to_string(), keywords_json(keywords)),
+        ("vgi.category".to_string(), category.to_string()),
     ]
 }

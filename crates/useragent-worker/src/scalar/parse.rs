@@ -75,7 +75,7 @@ impl ScalarFunction for UaParse {
              NULL row.",
             "ua_parse, parse user-agent, user agent struct, browser, os, device, brand, is_bot, \
              one-shot parse, struct",
-            "scalar/parse.rs",
+            "Full Parse",
         );
         tags.push(("vgi.executable_examples".into(), EXECUTABLE_EXAMPLES.into()));
         FunctionMetadata {

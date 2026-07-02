@@ -31,6 +31,68 @@ pub fn version() -> &'static str {
     env!("CARGO_PKG_VERSION")
 }
 
+/// Analyst task suite for `vgi.agent_test_tasks` (VGI152). Each task is a
+/// realistic natural-language prompt with a catalog-qualified `reference_sql`
+/// that produces the correct answer, so `vgi-lint simulate` can score whether an
+/// agent picks the right function. Versions are deliberately avoided in the
+/// expected answers because uap-core version numbers drift across releases.
+const AGENT_TEST_TASKS: &str = r#"[
+  {
+    "name": "browser_family",
+    "prompt": "Which browser family does this User-Agent belong to: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'? Return a single value.",
+    "reference_sql": "SELECT useragent.main.ua_browser('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')",
+    "ignore_column_names": true
+  },
+  {
+    "name": "operating_system",
+    "prompt": "Identify the operating system for the User-Agent 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'. Return a single value.",
+    "reference_sql": "SELECT useragent.main.ua_os('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1')",
+    "ignore_column_names": true
+  },
+  {
+    "name": "is_bot",
+    "prompt": "Is the User-Agent 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' a bot or crawler? Return a single boolean value.",
+    "reference_sql": "SELECT useragent.main.ua_is_bot('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')",
+    "ignore_column_names": true
+  },
+  {
+    "name": "device_brand",
+    "prompt": "What device brand made the device behind the User-Agent 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'? Return a single value.",
+    "reference_sql": "SELECT useragent.main.ua_device_brand('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1')",
+    "ignore_column_names": true
+  },
+  {
+    "name": "parse_struct_os",
+    "prompt": "Using the single function that parses a User-Agent into a STRUCT of all fields at once, read just the operating-system field from the parsed struct for 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'. Return a single value.",
+    "reference_sql": "SELECT (useragent.main.ua_parse('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')).os",
+    "ignore_column_names": true
+  },
+  {
+    "name": "browser_version",
+    "prompt": "Extract the browser (client) version string from the User-Agent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'. Return a single value.",
+    "reference_sql": "SELECT useragent.main.ua_browser_version('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')",
+    "ignore_column_names": true
+  },
+  {
+    "name": "os_version",
+    "prompt": "Extract the operating-system version string from the User-Agent 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'. Return a single value.",
+    "reference_sql": "SELECT useragent.main.ua_os_version('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1')",
+    "ignore_column_names": true
+  },
+  {
+    "name": "device_model",
+    "prompt": "What device family/model does the User-Agent 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1' identify? Return a single value.",
+    "reference_sql": "SELECT useragent.main.ua_device('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1')",
+    "ignore_column_names": true
+  },
+  {
+    "name": "worker_version",
+    "prompt": "Report the version string of the running useragent worker. Return a single value.",
+    "reference_sql": "SELECT useragent.main.useragent_version()",
+    "ignore_column_names": true
+  }
+]"#;
+
 /// Catalog + schema metadata (description, provenance) surfaced to DuckDB and
 /// the `vgi-lint` metadata-quality linter. The function objects themselves are
 /// served from the registered scalars; this only adds catalog/schema-level
@@ -90,19 +152,15 @@ fn catalog_metadata(name: &str) -> CatalogModel {
                  Arrow. Unidentified families normalize to SQL `NULL` (never the literal \
                  `'Other'`), and crawlers are recognized via uap-core's `Spider` device \
                  classification.\n\n\
-                 The function surface is small and composable. Use the single-field accessors \
-                 `ua_browser`, `ua_browser_version`, `ua_os`, `ua_os_version`, `ua_device`, and \
-                 `ua_device_brand` to pull one attribute at a time; call `ua_is_bot` for a \
-                 `BOOLEAN` crawler/spider flag; or call `ua_parse` once to get every field at \
-                 once as a `STRUCT(browser, browser_version, os, os_version, device, brand, \
-                 is_bot)`. `useragent_version` reports the worker build. Every accessor takes a \
-                 single `ua VARCHAR` argument and returns `NULL` for empty or unrecognizable \
-                 input — perfect for `SELECT ua_browser(ua), ua_os(ua) FROM hits` style \
-                 enrichment, traffic segmentation by platform/device, and bot filtering in \
-                 SQL.\n\n\
-                 ## Functions\n\n- `ua_browser`, `ua_browser_version`\n- `ua_os`, \
-                 `ua_os_version`\n- `ua_device`, `ua_device_brand`\n- `ua_is_bot` (BOOLEAN)\n- \
-                 `ua_parse` (STRUCT of all fields)\n- `useragent_version`\n\n\
+                 The function surface is small and composable: single-field accessors pull one \
+                 attribute (browser, operating system, or device) at a time, a boolean predicate \
+                 flags automated traffic, and a one-shot parser returns every field together as a \
+                 `STRUCT` when you need several at once. Every accessor takes a single \
+                 `ua VARCHAR` argument and returns `NULL` for empty or unrecognizable input, so \
+                 it drops straight into web-analytics enrichment, traffic segmentation by \
+                 platform/device, and bot filtering. Reach for this worker whenever you have a \
+                 column of raw User-Agent headers to enrich, segment, or filter in SQL; list the \
+                 schema to discover the exact function names and signatures.\n\n\
                  ## Learn more\n\n\
                  - Source code: [ua-parser/uap-core](https://github.com/ua-parser/uap-core)\n\
                  - Specification: \
@@ -125,6 +183,10 @@ fn catalog_metadata(name: &str) -> CatalogModel {
                 "vgi.support_policy_url".to_string(),
                 "https://github.com/Query-farm/vgi-useragent/blob/main/README.md".to_string(),
             ),
+            // VGI152: analyst task suite that `vgi-lint simulate` uses to measure
+            // how well an agent can drive this worker. Each task's reference_sql is
+            // catalog-qualified so it runs regardless of search_path.
+            ("vgi.agent_test_tasks".to_string(), AGENT_TEST_TASKS.to_string()),
         ],
         source_url: Some("https://github.com/Query-farm/vgi-useragent".to_string()),
         schemas: vec![CatSchema {
@@ -144,22 +206,44 @@ fn catalog_metadata(name: &str) -> CatalogModel {
                 ("domain".to_string(), "web-analytics".to_string()),
                 ("category".to_string(), "parsing".to_string()),
                 ("topic".to_string(), "user-agent-detection".to_string()),
+                // VGI413 category registry: an ordered list the object-level
+                // `vgi.category` tags must name. Drives navigation/listing sections.
+                (
+                    "vgi.categories".to_string(),
+                    "[\
+                     {\"name\":\"Browser\",\"description\":\"Browser/client family and version \
+                     accessors.\"},\
+                     {\"name\":\"Operating System\",\"description\":\"Operating-system family and \
+                     version accessors.\"},\
+                     {\"name\":\"Device\",\"description\":\"Device family/model and brand \
+                     accessors.\"},\
+                     {\"name\":\"Bot Detection\",\"description\":\"Spider/crawler/bot \
+                     identification.\"},\
+                     {\"name\":\"Full Parse\",\"description\":\"One-shot extraction of every \
+                     User-Agent field as a STRUCT.\"},\
+                     {\"name\":\"Diagnostics\",\"description\":\"Worker build and version \
+                     information.\"}\
+                     ]"
+                    .to_string(),
+                ),
                 (
                     "vgi.doc_llm".to_string(),
                     "## useragent.main\n\nThe schema holding the User-Agent parsing and \
-                     bot-detection functions. Extract the browser, OS, or device from a \
-                     `User-Agent` string with the single-field `ua_*` accessors, detect \
-                     spiders/crawlers with `ua_is_bot`, or parse every field at once into a \
-                     `STRUCT` with `ua_parse`. Use these for web-analytics enrichment and traffic \
-                     segmentation."
+                     bot-detection functions. Use the single-field accessors to extract one \
+                     browser, operating-system, or device attribute at a time, a predicate to \
+                     detect spiders/crawlers, and a one-shot parser to return every field together \
+                     as a `STRUCT`. Reach for these for web-analytics enrichment and traffic \
+                     segmentation; list the schema to discover the exact function names and \
+                     signatures."
                         .to_string(),
                 ),
                 (
                     "vgi.doc_md".to_string(),
                     "# useragent.main\n\nUser-Agent parsing and bot-detection functions over \
-                     Apache Arrow.\n\nIncludes the single-field accessors (`ua_browser`, `ua_os`, \
-                     `ua_device`, …), the `ua_is_bot` predicate, and the one-shot `ua_parse` \
-                     STRUCT function."
+                     Apache Arrow.\n\nThe functions group into single-field accessors for browser, \
+                     operating-system, and device attributes, a boolean bot/crawler predicate, and \
+                     a one-shot parser that returns all fields together as a `STRUCT`. List the \
+                     schema to see the full function set and their signatures."
                         .to_string(),
                 ),
                 // VGI506 representative example queries for the schema.
