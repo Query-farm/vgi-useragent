@@ -3,14 +3,11 @@
 
 mod fields;
 mod parse;
-mod version;
 
 use vgi::Worker;
 
 /// Register every scalar function on the worker.
 pub fn register(worker: &mut Worker) {
-    worker.register_scalar(version::UseragentVersion);
-
     // Single-field VARCHAR accessors.
     worker.register_scalar(fields::UaField::browser());
     worker.register_scalar(fields::UaField::browser_version());

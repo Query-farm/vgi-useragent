@@ -57,7 +57,10 @@ mapped to **NULL** rather than the literal string `'Other'`.
 | `ua_device_brand(ua)` | `VARCHAR` | Device brand, e.g. `'Apple'`. |
 | `ua_is_bot(ua)` | `BOOLEAN` | `true` for spiders/crawlers (e.g. Googlebot). |
 | `ua_parse(ua)` | `STRUCT(...)` | One-shot parse (all fields below). |
-| `useragent_version()` | `VARCHAR` | Worker version string. |
+
+The worker's software version is published on the catalog itself (read it from
+`vgi_catalogs().implementation_version`), so no query-spending
+`useragent_version()` scalar is needed.
 
 `ua_parse` returns
 `STRUCT(browser VARCHAR, browser_version VARCHAR, os VARCHAR, os_version VARCHAR,

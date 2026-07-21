@@ -13,10 +13,7 @@ use std::sync::Arc;
 use arrow_array::builder::{BooleanBuilder, StringBuilder};
 use arrow_array::{ArrayRef, RecordBatch};
 use arrow_schema::DataType;
-use vgi::{
-    ArgSpec, BindParams, BindResponse, FunctionExample, FunctionMetadata, ProcessParams,
-    ScalarFunction,
-};
+use vgi::{ArgSpec, BindParams, BindResponse, FunctionMetadata, ProcessParams, ScalarFunction};
 use vgi_rpc::{Result, RpcError};
 
 use crate::arrow_io::text_str;
@@ -67,8 +64,12 @@ impl Field {
         }
     }
 
-    /// A worked example query for this field's scalar, used by `vgi-lint`.
-    fn example(self) -> FunctionExample {
+    /// A described example query for this field's scalar, emitted as the
+    /// `vgi.example_queries` JSON tag (VGI515). The native `Meta.examples`
+    /// carrier drops per-example descriptions when surfaced through
+    /// `duckdb_functions().examples`, so the described tag is the carrier that
+    /// keeps a human-readable description on every example.
+    fn example_queries(self) -> String {
         // A common desktop Chrome-on-Windows User-Agent, reused across fields.
         const CHROME_WIN: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 \
              (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
@@ -98,11 +99,11 @@ impl Field {
                 "Extract the device brand from a User-Agent (NULL for a generic desktop).",
             ),
         };
-        FunctionExample {
-            sql: format!("SELECT useragent.main.{fn_name}('{CHROME_WIN}');"),
-            description: description.to_string(),
-            expected_output: None,
-        }
+        serde_json::json!([{
+            "description": description,
+            "sql": format!("SELECT useragent.main.{fn_name}('{CHROME_WIN}')"),
+        }])
+        .to_string()
     }
 
     /// The five standard per-object discovery/description tags for this field's
@@ -123,10 +124,9 @@ impl Field {
                  the embedded uap-core regex database, so very new or obscure clients may not \
                  match.",
                 "# Browser family\n\n`ua_browser(ua)` returns the browser/client family parsed \
-                 from a User-Agent string.\n\n## Usage\n\n```sql\nSELECT ua_browser(ua) AS \
-                 browser FROM hits;\n-- 'Chrome', 'Safari', 'Firefox', …\n```\n\n## Notes\n\n- \
-                 NULL/empty/unknown input yields NULL.\n- Use `ua_browser_version` for the \
-                 version component.",
+                 from a User-Agent string — values such as `Chrome`, `Safari`, or `Firefox`.\n\n\
+                 ## Notes\n\n- `NULL`/empty/unknown input yields `NULL`.\n- Use \
+                 `ua_browser_version` for the version component.",
                 "browser, client, browser family, chrome, safari, firefox, edge, ua_browser, \
                  user-agent",
             ),
@@ -143,10 +143,9 @@ impl Field {
                  embedded uap-core database and can drift across releases, so prefer ranges over \
                  exact-equality comparisons.",
                 "# Browser version\n\n`ua_browser_version(ua)` returns the dotted browser version \
-                 parsed from a User-Agent string.\n\n## Usage\n\n```sql\nSELECT \
-                 ua_browser_version(ua) AS ver FROM hits;\n-- '120.0.0'\n```\n\n## Notes\n\n- \
-                 NULL/empty/version-less input yields NULL.\n- Versions may drift with uap-core \
-                 updates; compare with ranges, not exact equality.",
+                 parsed from a User-Agent string (for example `120.0.0`).\n\n## Notes\n\n- \
+                 `NULL`/empty/version-less input yields `NULL`.\n- Versions may drift with \
+                 uap-core updates; compare with ranges, not exact equality.",
                 "browser version, client version, version number, ua_browser_version, user-agent",
             ),
             Field::Os => (
@@ -159,10 +158,9 @@ impl Field {
                  as `Windows`, `iOS`, `Android`, `Mac OS X`, or `Linux`.\n\n**Edge cases:** \
                  `NULL`, empty, or unidentifiable input returns `NULL` (never `'Other'`).",
                 "# Operating system\n\n`ua_os(ua)` returns the operating-system family parsed \
-                 from a User-Agent string.\n\n## Usage\n\n```sql\nSELECT ua_os(ua) AS os FROM \
-                 hits;\n-- 'Windows', 'iOS', 'Android', …\n```\n\n## Notes\n\n- \
-                 NULL/empty/unknown input yields NULL.\n- Use `ua_os_version` for the version \
-                 component.",
+                 from a User-Agent string — values such as `Windows`, `iOS`, or `Android`.\n\n\
+                 ## Notes\n\n- `NULL`/empty/unknown input yields `NULL`.\n- Use `ua_os_version` \
+                 for the version component.",
                 "os, operating system, platform, windows, ios, android, macos, linux, ua_os, \
                  user-agent",
             ),
@@ -177,10 +175,9 @@ impl Field {
                  `NULL`, empty, unparseable, or version-less input returns `NULL`. Values track \
                  the embedded uap-core database; prefer ranges over exact comparisons.",
                 "# Operating-system version\n\n`ua_os_version(ua)` returns the dotted OS version \
-                 parsed from a User-Agent string.\n\n## Usage\n\n```sql\nSELECT ua_os_version(ua) \
-                 AS os_ver FROM hits;\n-- '17.0', '10'\n```\n\n## Notes\n\n- \
-                 NULL/empty/version-less input yields NULL.\n- Versions may drift with uap-core \
-                 updates.",
+                 parsed from a User-Agent string (for example `17.0` or `10`).\n\n## Notes\n\n- \
+                 `NULL`/empty/version-less input yields `NULL`.\n- Versions may drift with \
+                 uap-core updates.",
                 "os version, operating system version, platform version, ua_os_version, \
                  user-agent",
             ),
@@ -196,9 +193,9 @@ impl Field {
                  device signal. For bots, the device is deliberately suppressed to `NULL` (use \
                  `ua_is_bot` instead).",
                 "# Device family\n\n`ua_device(ua)` returns the device family/model parsed from a \
-                 User-Agent string.\n\n## Usage\n\n```sql\nSELECT ua_device(ua) AS device FROM \
-                 hits;\n-- 'iPhone', 'Pixel 7'\n```\n\n## Notes\n\n- NULL for generic desktops, \
-                 bots, and unknown devices.\n- Use `ua_device_brand` for the manufacturer.",
+                 User-Agent string (for example `iPhone` or `Pixel 7`).\n\n## Notes\n\n- `NULL` \
+                 for generic desktops, bots, and unknown devices.\n- Use `ua_device_brand` for \
+                 the manufacturer.",
                 "device, device family, model, phone, tablet, iphone, pixel, ua_device, \
                  user-agent",
             ),
@@ -213,9 +210,8 @@ impl Field {
                  generic desktop browsers, bots, and unidentifiable input return `NULL`; brand \
                  is suppressed to `NULL` for bots.",
                 "# Device brand\n\n`ua_device_brand(ua)` returns the device brand/manufacturer \
-                 parsed from a User-Agent string.\n\n## Usage\n\n```sql\nSELECT \
-                 ua_device_brand(ua) AS brand FROM hits;\n-- 'Apple', 'Samsung', 'Google'\n```\n\
-                 \n## Notes\n\n- NULL for generic desktops, bots, and unknown brands.\n- Use \
+                 parsed from a User-Agent string (for example `Apple`, `Samsung`, or `Google`).\n\
+                 \n## Notes\n\n- `NULL` for generic desktops, bots, and unknown brands.\n- Use \
                  `ua_device` for the specific model.",
                 "device brand, manufacturer, maker, apple, samsung, google, ua_device_brand, \
                  user-agent",
@@ -266,11 +262,12 @@ impl ScalarFunction for UaField {
     }
 
     fn metadata(&self) -> FunctionMetadata {
+        let mut tags = self.0.object_tags();
+        tags.push(("vgi.example_queries".to_string(), self.0.example_queries()));
         FunctionMetadata {
             description: self.0.description().into(),
             return_type: Some(DataType::Utf8),
-            examples: vec![self.0.example()],
-            tags: self.0.object_tags(),
+            tags,
             ..Default::default()
         }
     }
@@ -279,8 +276,8 @@ impl ScalarFunction for UaField {
         vec![ArgSpec::any_column(
             "ua",
             0,
-            "The HTTP User-Agent header value to parse; the requested field (browser, OS, or \
-             device component) is extracted from it.",
+            "The HTTP User-Agent header string to parse — a table column of raw User-Agent \
+             values or a single string literal.",
         )]
     }
 
@@ -317,23 +314,9 @@ impl ScalarFunction for UaIsBot {
     }
 
     fn metadata(&self) -> FunctionMetadata {
-        FunctionMetadata {
-            description:
-                "True if the User-Agent is a spider/crawler (e.g. Googlebot), else false; \
-                          NULL in → NULL out"
-                    .into(),
-            return_type: Some(DataType::Boolean),
-            examples: vec![FunctionExample {
-                sql: "SELECT useragent.main.ua_is_bot('Mozilla/5.0 (compatible; Googlebot/2.1; \
-                      +http://www.google.com/bot.html)');"
-                    .into(),
-                description:
-                    "Detect that the Googlebot crawler User-Agent is a bot (returns true).".into(),
-                expected_output: None,
-            }],
-            tags: crate::meta::object_tags(
-                "Detect Bot Crawler",
-                "## ua_is_bot\n\nReturns a `BOOLEAN` that is `TRUE` when an HTTP `User-Agent` \
+        let mut tags = crate::meta::object_tags(
+            "Detect Bot Crawler",
+            "## ua_is_bot\n\nReturns a `BOOLEAN` that is `TRUE` when an HTTP `User-Agent` \
                  string identifies a **spider / crawler / bot** (for example Googlebot, Bingbot, \
                  or other automated agents) and `FALSE` for ordinary human browsers.\n\n**When \
                  to use:** filter automated traffic out of web-analytics aggregates, route bot \
@@ -343,14 +326,29 @@ impl ScalarFunction for UaIsBot {
                  input is `NULL`.\n\n**How it works:** detection is driven by the embedded \
                  uap-core regex database, which classifies crawlers under the device family \
                  `Spider`. Unrecognized agents are treated as non-bots (`FALSE`).",
-                "# Bot detection\n\n`ua_is_bot(ua)` returns TRUE for spiders/crawlers and FALSE \
-                 for ordinary browsers.\n\n## Usage\n\n```sql\n-- Keep only human traffic\nSELECT \
-                 * FROM hits WHERE NOT ua_is_bot(ua);\n```\n\n## Notes\n\n- NULL input yields \
-                 NULL.\n- Backed by uap-core's `Spider` device family.",
-                "bot, crawler, spider, googlebot, bingbot, robot, automated traffic, filter, \
+            "# Bot detection\n\n`ua_is_bot(ua)` returns `TRUE` for spiders/crawlers and \
+                 `FALSE` for ordinary browsers. A common pattern is `WHERE NOT ua_is_bot(ua)` to \
+                 keep only human traffic.\n\n## Notes\n\n- `NULL` input yields `NULL`.\n- Backed \
+                 by uap-core's `Spider` device family.",
+            "bot, crawler, spider, googlebot, bingbot, robot, automated traffic, filter, \
                  ua_is_bot, user-agent",
-                "Bot Detection",
-            ),
+            "Bot Detection",
+        );
+        tags.push((
+            "vgi.example_queries".to_string(),
+            serde_json::json!([{
+                "description": "Detect that the Googlebot crawler User-Agent is a bot (returns true).",
+                "sql": "SELECT useragent.main.ua_is_bot('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')",
+            }])
+            .to_string(),
+        ));
+        FunctionMetadata {
+            description:
+                "True if the User-Agent is a spider/crawler (e.g. Googlebot), else false; \
+                 NULL in → NULL out"
+                    .into(),
+            return_type: Some(DataType::Boolean),
+            tags,
             ..Default::default()
         }
     }

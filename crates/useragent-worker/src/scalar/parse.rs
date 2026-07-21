@@ -8,10 +8,7 @@ use std::sync::Arc;
 use arrow_array::builder::{BooleanBuilder, StringBuilder};
 use arrow_array::{ArrayRef, RecordBatch, StructArray};
 use arrow_buffer::NullBuffer;
-use vgi::{
-    ArgSpec, BindParams, BindResponse, FunctionExample, FunctionMetadata, ProcessParams,
-    ScalarFunction,
-};
+use vgi::{ArgSpec, BindParams, BindResponse, FunctionMetadata, ProcessParams, ScalarFunction};
 use vgi_rpc::{Result, RpcError};
 
 use crate::arrow_io::{parse_struct_fields, parse_struct_type, text_str};
@@ -37,10 +34,17 @@ const EXECUTABLE_EXAMPLES: &str = r#"[
   {
     "description": "Parse every field of a Chrome-on-Windows User-Agent at once.",
     "sql": "SELECT useragent.main.ua_parse('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36') AS parsed"
-  },
+  }
+]"#;
+
+/// The described `vgi.example_queries` entry for `ua_parse` (VGI515). The native
+/// `Meta.examples` carrier loses per-example descriptions when surfaced through
+/// `duckdb_functions().examples`, so the described tag is what keeps a
+/// human-readable description on the example.
+const EXAMPLE_QUERIES: &str = r#"[
   {
-    "description": "Report the running worker version string.",
-    "sql": "SELECT useragent.main.useragent_version() AS version"
+    "description": "Parse an iPhone Safari User-Agent into all of its fields at once (browser, OS, device, brand, is_bot).",
+    "sql": "SELECT useragent.main.ua_parse('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1') AS parsed"
   }
 ]"#;
 
@@ -56,42 +60,33 @@ impl ScalarFunction for UaParse {
             "Parse User-Agent Fields",
             "## ua_parse\n\nParses an HTTP `User-Agent` string into a **single `STRUCT`** \
              containing every component at once, in one pass over the input.\n\n**Returned \
-             struct fields:**\n\n- `browser` (VARCHAR) — client family\n- `browser_version` \
-             (VARCHAR) — dotted client version\n- `os` (VARCHAR) — operating-system family\n- \
-             `os_version` (VARCHAR) — dotted OS version\n- `device` (VARCHAR) — device \
-             family/model\n- `brand` (VARCHAR) — device brand/manufacturer\n- `is_bot` (BOOLEAN) \
-             — spider/crawler flag\n\n**When to use:** prefer `ua_parse` over calling the \
+             struct fields:**\n\n- `browser` (`VARCHAR`) — client family\n- `browser_version` \
+             (`VARCHAR`) — dotted client version\n- `os` (`VARCHAR`) — operating-system family\n- \
+             `os_version` (`VARCHAR`) — dotted OS version\n- `device` (`VARCHAR`) — device \
+             family/model\n- `brand` (`VARCHAR`) — device brand/manufacturer\n- `is_bot` \
+             (`BOOLEAN`) — spider/crawler flag\n\n**When to use:** prefer `ua_parse` over calling \
+             the \
              individual `ua_*` accessors when you need several fields, since it parses the string \
              only once. Project with `(ua_parse(ua)).*` or pick fields like \
              `(ua_parse(ua)).os`.\n\n**Edge cases:** `NULL`, empty, or unparseable input yields \
              a `NULL` struct row. For bots, `device` and `brand` are suppressed to `NULL` while \
              `is_bot` is `TRUE`. Unidentified individual fields are `NULL` rather than `'Other'`.",
-            "# Parse all fields\n\n`ua_parse(ua)` returns a STRUCT with every parsed User-Agent \
-             field in one pass.\n\n## Usage\n\n```sql\n-- Explode all fields\nSELECT \
-             (ua_parse(ua)).* FROM hits;\n\n-- Pick a couple\nSELECT (ua_parse(ua)).browser, \
-             (ua_parse(ua)).os FROM hits;\n```\n\n## Struct shape\n\n`STRUCT(browser, \
+            "# Parse all fields\n\n`ua_parse(ua)` returns a `STRUCT` with every parsed User-Agent \
+             field in one pass. Project all fields with `(ua_parse(ua)).*`, or pick individual \
+             fields like `(ua_parse(ua)).browser`.\n\n## Struct shape\n\n`STRUCT(browser, \
              browser_version, os, os_version, device, brand, is_bot)`\n\n## Notes\n\n- More \
-             efficient than calling each `ua_*` accessor separately.\n- NULL/unparseable input → \
-             NULL row.",
+             efficient than calling each `ua_*` accessor separately.\n- `NULL`/unparseable input \
+             yields a `NULL` row.",
             "ua_parse, parse user-agent, user agent struct, browser, os, device, brand, is_bot, \
              one-shot parse, struct",
             "Full Parse",
         );
         tags.push(("vgi.executable_examples".into(), EXECUTABLE_EXAMPLES.into()));
+        tags.push(("vgi.example_queries".into(), EXAMPLE_QUERIES.into()));
         FunctionMetadata {
             description: "Parse a User-Agent into STRUCT(browser, browser_version, os, \
                           os_version, device, brand, is_bot); NULL/unparseable → NULL row"
                 .into(),
-            examples: vec![FunctionExample {
-                sql: "SELECT useragent.main.ua_parse('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 \
-                      like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 \
-                      Mobile/15E148 Safari/604.1') AS parsed;"
-                    .into(),
-                description: "Parse an iPhone Safari User-Agent into all of its fields at once \
-                              (browser, OS, device, brand, is_bot)."
-                    .into(),
-                expected_output: None,
-            }],
             tags,
             ..Default::default()
         }

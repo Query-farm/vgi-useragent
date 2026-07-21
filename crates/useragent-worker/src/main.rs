@@ -84,12 +84,29 @@ const AGENT_TEST_TASKS: &str = r#"[
     "prompt": "What device family/model does the User-Agent 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1' identify? Return a single value.",
     "reference_sql": "SELECT useragent.main.ua_device('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1')",
     "ignore_column_names": true
+  }
+]"#;
+
+/// Representative schema-level examples for the `vgi.example_queries` tag
+/// (VGI506/VGI515) — a JSON list of `{description, sql}` so every example carries
+/// a human-readable description. Each query is catalog-qualified and
+/// self-contained so it runs as written against an attached `useragent` worker.
+const SCHEMA_EXAMPLE_QUERIES: &str = r#"[
+  {
+    "description": "Extract the browser family from a desktop Chrome User-Agent.",
+    "sql": "SELECT useragent.main.ua_browser('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')"
   },
   {
-    "name": "worker_version",
-    "prompt": "Report the version string of the running useragent worker. Return a single value.",
-    "reference_sql": "SELECT useragent.main.useragent_version()",
-    "ignore_column_names": true
+    "description": "Extract the operating system from an iPhone Safari User-Agent.",
+    "sql": "SELECT useragent.main.ua_os('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1')"
+  },
+  {
+    "description": "Detect that the Googlebot crawler User-Agent is a bot.",
+    "sql": "SELECT useragent.main.ua_is_bot('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')"
+  },
+  {
+    "description": "Parse every field of a Chrome-on-Windows User-Agent at once as a STRUCT.",
+    "sql": "SELECT useragent.main.ua_parse('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36') AS parsed"
   }
 ]"#;
 
@@ -159,8 +176,7 @@ fn catalog_metadata(name: &str) -> CatalogModel {
                  `ua VARCHAR` argument and returns `NULL` for empty or unrecognizable input, so \
                  it drops straight into web-analytics enrichment, traffic segmentation by \
                  platform/device, and bot filtering. Reach for this worker whenever you have a \
-                 column of raw User-Agent headers to enrich, segment, or filter in SQL; list the \
-                 schema to discover the exact function names and signatures.\n\n\
+                 column of raw User-Agent headers to enrich, segment, or filter in SQL.\n\n\
                  ## Learn more\n\n\
                  - Source code: [ua-parser/uap-core](https://github.com/ua-parser/uap-core)\n\
                  - Specification: \
@@ -189,6 +205,10 @@ fn catalog_metadata(name: &str) -> CatalogModel {
             ("vgi.agent_test_tasks".to_string(), AGENT_TEST_TASKS.to_string()),
         ],
         source_url: Some("https://github.com/Query-farm/vgi-useragent".to_string()),
+        // VGI328: the worker's software version lives on the catalog (read from
+        // `vgi_catalogs()` without spending a query) rather than in a
+        // parameterless `useragent_version()` scalar.
+        implementation_version: Some(version().to_string()),
         schemas: vec![CatSchema {
             name: "main".to_string(),
             comment: Some("User-Agent parsing and bot-detection functions.".to_string()),
@@ -220,9 +240,7 @@ fn catalog_metadata(name: &str) -> CatalogModel {
                      {\"name\":\"Bot Detection\",\"description\":\"Spider/crawler/bot \
                      identification.\"},\
                      {\"name\":\"Full Parse\",\"description\":\"One-shot extraction of every \
-                     User-Agent field as a STRUCT.\"},\
-                     {\"name\":\"Diagnostics\",\"description\":\"Worker build and version \
-                     information.\"}\
+                     User-Agent field as a STRUCT.\"}\
                      ]"
                     .to_string(),
                 ),
@@ -232,9 +250,8 @@ fn catalog_metadata(name: &str) -> CatalogModel {
                      bot-detection functions. Use the single-field accessors to extract one \
                      browser, operating-system, or device attribute at a time, a predicate to \
                      detect spiders/crawlers, and a one-shot parser to return every field together \
-                     as a `STRUCT`. Reach for these for web-analytics enrichment and traffic \
-                     segmentation; list the schema to discover the exact function names and \
-                     signatures."
+                     as a `STRUCT`. Reach for these for web-analytics enrichment, bot filtering, \
+                     and traffic segmentation by client, platform, or device."
                         .to_string(),
                 ),
                 (
@@ -242,24 +259,14 @@ fn catalog_metadata(name: &str) -> CatalogModel {
                     "# useragent.main\n\nUser-Agent parsing and bot-detection functions over \
                      Apache Arrow.\n\nThe functions group into single-field accessors for browser, \
                      operating-system, and device attributes, a boolean bot/crawler predicate, and \
-                     a one-shot parser that returns all fields together as a `STRUCT`. List the \
-                     schema to see the full function set and their signatures."
+                     a one-shot parser that returns all fields together as a `STRUCT`."
                         .to_string(),
                 ),
-                // VGI506 representative example queries for the schema.
+                // VGI506/VGI515: representative example queries for the schema, as a
+                // JSON list of {description, sql} so each carries a description.
                 (
                     "vgi.example_queries".to_string(),
-                    "SELECT useragent.main.ua_browser('Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
-                     AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');\n\
-                     SELECT useragent.main.ua_os('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like \
-                     Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 \
-                     Mobile/15E148 Safari/604.1');\n\
-                     SELECT useragent.main.ua_is_bot('Mozilla/5.0 (compatible; Googlebot/2.1; \
-                     +http://www.google.com/bot.html)');\n\
-                     SELECT useragent.main.ua_parse('Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
-                     AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36') \
-                     AS parsed;"
-                        .to_string(),
+                    SCHEMA_EXAMPLE_QUERIES.to_string(),
                 ),
             ],
             views: Vec::new(),

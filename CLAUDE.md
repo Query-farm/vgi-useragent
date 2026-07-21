@@ -62,7 +62,9 @@ in `ua_is_bot` / the `is_bot` struct field.
 Scalars (all arity-1 `ua VARCHAR`, positional; NULL in → NULL out):
 `ua_browser`, `ua_browser_version`, `ua_os`, `ua_os_version`, `ua_device`,
 `ua_device_brand` → VARCHAR; `ua_is_bot` → BOOLEAN; `ua_parse` → STRUCT(browser,
-browser_version, os, os_version, device, brand, is_bot). Plus `useragent_version()`.
+browser_version, os, os_version, device, brand, is_bot). The worker version is
+published on the catalog as `implementation_version` (read via `vgi_catalogs()`),
+not a parameterless `useragent_version()` scalar (dropped per vgi-lint VGI328).
 
 ## Sharp edges (learned from the templates)
 
@@ -70,8 +72,8 @@ browser_version, os, os_version, device, brand, is_bot). Plus `useragent_version
    `statement ok` + `LOAD vgi;`. Functions live under the `useragent` catalog, so
    each file does `SET search_path = 'useragent.main'`, then `USE memory` before
    `DETACH`.
-2. **Scalars are positional-only.** All ours are arity-1 (or 0 for
-   `useragent_version`); no optional args / overloads needed.
+2. **Scalars are positional-only.** All ours are arity-1; no optional args /
+   overloads needed.
 3. **STRUCT returns** need the Arrow `DataType` to match between `on_bind` and
    `process`. Centralized in `arrow_io::parse_struct_fields()` /
    `parse_struct_type()`; a mismatch makes DuckDB reject the batch. A NULL input
