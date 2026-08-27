@@ -87,6 +87,7 @@ pub mod test_support {
             output_schema,
             input_schema: None,
             execution_id: Vec::new(),
+            bind_opaque_data: Vec::new(),
             init_opaque_data: Vec::new(),
             arguments,
             settings: Default::default(),
@@ -106,6 +107,7 @@ pub mod test_support {
             at_unit: None,
             at_value: None,
             copy_from: None,
+            split_payloads: None,
         }
     }
 
