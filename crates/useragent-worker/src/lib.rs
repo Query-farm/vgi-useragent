@@ -37,58 +37,43 @@ pub fn version() -> &'static str {
 }
 
 /// Analyst task suite for `vgi.agent_test_tasks` (VGI152). Each task is a
-/// realistic natural-language prompt with a catalog-qualified `reference_sql`
-/// that produces the correct answer, so `vgi-lint simulate` can score whether an
+/// realistic natural-language prompt; its catalog-qualified `reference_sql`
+/// grader lives in `vgi-agent-tests.yaml` at the repo root (VGI416, never
+/// published in the catalog), so `vgi-lint simulate` can score whether an
 /// agent picks the right function. Versions are deliberately avoided in the
 /// expected answers because uap-core version numbers drift across releases.
 const AGENT_TEST_TASKS: &str = r#"[
   {
     "name": "browser_family",
-    "prompt": "Which browser family does this User-Agent belong to: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'? Return a single value.",
-    "reference_sql": "SELECT useragent.main.ua_browser('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')",
-    "ignore_column_names": true
+    "prompt": "Which browser family does this User-Agent belong to: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'? Return a single value."
   },
   {
     "name": "operating_system",
-    "prompt": "Identify the operating system for the User-Agent 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'. Return a single value.",
-    "reference_sql": "SELECT useragent.main.ua_os('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1')",
-    "ignore_column_names": true
+    "prompt": "Identify the operating system for the User-Agent 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'. Return a single value."
   },
   {
     "name": "is_bot",
-    "prompt": "Is the User-Agent 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' a bot or crawler? Return a single boolean value.",
-    "reference_sql": "SELECT useragent.main.ua_is_bot('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')",
-    "ignore_column_names": true
+    "prompt": "Is the User-Agent 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' a bot or crawler? Return a single boolean value."
   },
   {
     "name": "device_brand",
-    "prompt": "What device brand made the device behind the User-Agent 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'? Return a single value.",
-    "reference_sql": "SELECT useragent.main.ua_device_brand('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1')",
-    "ignore_column_names": true
+    "prompt": "What device brand made the device behind the User-Agent 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'? Return a single value."
   },
   {
     "name": "parse_struct_os",
-    "prompt": "Using the single function that parses a User-Agent into a STRUCT of all fields at once, read just the operating-system field from the parsed struct for 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'. Return a single value.",
-    "reference_sql": "SELECT (useragent.main.ua_parse('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')).os",
-    "ignore_column_names": true
+    "prompt": "Using the single function that parses a User-Agent into a STRUCT of all fields at once, read just the operating-system field from the parsed struct for 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'. Return a single value."
   },
   {
     "name": "browser_version",
-    "prompt": "Extract the browser (client) version string from the User-Agent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'. Return a single value.",
-    "reference_sql": "SELECT useragent.main.ua_browser_version('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')",
-    "ignore_column_names": true
+    "prompt": "Extract the browser (client) version string from the User-Agent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'. Return a single value."
   },
   {
     "name": "os_version",
-    "prompt": "Extract the operating-system version string from the User-Agent 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'. Return a single value.",
-    "reference_sql": "SELECT useragent.main.ua_os_version('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1')",
-    "ignore_column_names": true
+    "prompt": "Extract the operating-system version string from the User-Agent 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'. Return a single value."
   },
   {
     "name": "device_model",
-    "prompt": "What device family/model does the User-Agent 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1' identify? Return a single value.",
-    "reference_sql": "SELECT useragent.main.ua_device('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1')",
-    "ignore_column_names": true
+    "prompt": "What device family/model does the User-Agent 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1' identify? Return a single value."
   }
 ]"#;
 
@@ -216,6 +201,7 @@ fn catalog_metadata(name: &str) -> CatalogModel {
         implementation_version: Some(version().to_string()),
         schemas: vec![CatSchema {
             name: "main".to_string(),
+            path: Vec::new(),
             comment: Some("User-Agent parsing and bot-detection functions.".to_string()),
             tags: vec![
                 ("vgi.title".to_string(), "User-Agent — main".to_string()),

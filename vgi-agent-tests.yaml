@@ -1,0 +1,32 @@
+# Private graders for the agent-suitability suite (`vgi-lint simulate`).
+#
+# The prompts are published in the catalog's vgi.agent_test_tasks tag
+# (crates/useragent-worker/src/lib.rs); the answers live here, keyed by task name, so the
+# agent being graded never sees them. vgi-lint discovers this file in the
+# directory it runs from (the repo root in CI).
+
+tasks:
+  - name: "browser_family"
+    reference_sql: "SELECT useragent.main.ua_browser('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')"
+    ignore_column_names: true
+  - name: "operating_system"
+    reference_sql: "SELECT useragent.main.ua_os('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1')"
+    ignore_column_names: true
+  - name: "is_bot"
+    reference_sql: "SELECT useragent.main.ua_is_bot('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')"
+    ignore_column_names: true
+  - name: "device_brand"
+    reference_sql: "SELECT useragent.main.ua_device_brand('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1')"
+    ignore_column_names: true
+  - name: "parse_struct_os"
+    reference_sql: "SELECT (useragent.main.ua_parse('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')).os"
+    ignore_column_names: true
+  - name: "browser_version"
+    reference_sql: "SELECT useragent.main.ua_browser_version('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')"
+    ignore_column_names: true
+  - name: "os_version"
+    reference_sql: "SELECT useragent.main.ua_os_version('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1')"
+    ignore_column_names: true
+  - name: "device_model"
+    reference_sql: "SELECT useragent.main.ua_device('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1')"
+    ignore_column_names: true

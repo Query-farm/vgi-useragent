@@ -84,6 +84,8 @@ pub mod test_support {
             substream_id: None,
             if_none_match: None,
             if_modified_since: None,
+            bind_output_schema: output_schema.clone(),
+            current_pushdown_filters: None,
             output_schema,
             input_schema: None,
             execution_id: Vec::new(),
