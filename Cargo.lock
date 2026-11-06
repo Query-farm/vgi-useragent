@@ -2030,7 +2030,7 @@ dependencies = [
 
 [[package]]
 name = "useragent-wasm"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "useragent-worker",
  "vgi",
@@ -2038,7 +2038,7 @@ dependencies = [
 
 [[package]]
 name = "useragent-worker"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "arrow-array",
  "arrow-buffer",
