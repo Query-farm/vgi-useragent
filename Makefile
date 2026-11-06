@@ -30,7 +30,7 @@ test-unit:
 # Build the release worker, then run the SQL E2E suite against it. The worker is
 # a compiled binary, so the build must happen before the tests run.
 test-sql: build
-	VGI_USERAGENT_WORKER="$(WORKER)" $(SQL_RUNNER) --test-dir "$(TEST_DIR)" "$(TEST_PATTERN)"
+	VGI_USERAGENT_WORKER="$(WORKER)" $(SQL_RUNNER) --keep-home --test-dir "$(TEST_DIR)" "$(TEST_PATTERN)"
 
 # clippy (warnings are errors) + formatting check.
 lint:
