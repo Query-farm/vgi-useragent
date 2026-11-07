@@ -21,7 +21,7 @@ binary so the worker is fully self-contained.
 
 ```sql
 LOAD vgi;
-ATTACH 'useragent' (TYPE vgi, LOCATION './target/release/useragent-worker');
+ATTACH 'useragent' (TYPE vgi, LOCATION 'github-auto://Query-farm/vgi-useragent@v0.2.1');
 SET search_path = 'useragent.main';
 
 -- Individual fields.
@@ -40,6 +40,33 @@ SELECT ua_is_bot('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com
 SELECT (ua_parse(ua)).*  FROM hits;
 -- browser | browser_version | os | os_version | device | brand | is_bot
 ```
+
+## Quick start
+
+Every [GitHub release](https://github.com/Query-farm/vgi-useragent/releases) ships a prebuilt worker binary. The `vgi` extension downloads the one for your platform, checks its SHA-256 and caches it, so there is nothing to install besides DuckDB:
+
+```sql
+INSTALL vgi FROM community;
+LOAD vgi;
+
+ATTACH 'useragent' AS useragent (TYPE vgi, LOCATION 'github-auto://Query-farm/vgi-useragent@v0.2.1');
+
+-- Extract the browser family from a desktop Chrome User-Agent.
+SELECT useragent.main.ua_browser('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+
+-- Extract the operating system from an iPhone Safari User-Agent.
+SELECT useragent.main.ua_os('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1');
+```
+
+Prebuilt binaries cover macOS (Apple silicon), Linux (x86-64 and arm64). `github-auto://` needs an explicit release tag; change `@v0.2.1` to move to a newer release.
+
+### Other ways to run it
+
+- **Manual download.** Download the archive for your platform from the [releases page](https://github.com/Query-farm/vgi-useragent/releases), verify it against its `.sha256` file (a cosign `.cosign.bundle` is published alongside), unpack it, and set `LOCATION` to the path of the extracted worker executable.
+
+### Build from source
+
+To build the worker yourself, see [Building & testing](#building--testing).
 
 ## Functions
 
