@@ -88,6 +88,7 @@ impl ScalarFunction for UaParse {
                           os_version, device, brand, is_bot); NULL/unparseable → NULL row"
                 .into(),
             tags,
+            return_type: Some(parse_struct_type()),
             ..Default::default()
         }
     }
