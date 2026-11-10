@@ -21,7 +21,7 @@ binary so the worker is fully self-contained.
 
 ```sql
 LOAD vgi;
-ATTACH 'useragent' (TYPE vgi, LOCATION 'github-auto://Query-farm/vgi-useragent@v0.2.1');
+ATTACH 'useragent' (TYPE vgi, LOCATION 'github-auto://Query-farm/vgi-useragent@v0.3.0');
 SET search_path = 'useragent.main';
 
 -- Individual fields.
@@ -49,7 +49,7 @@ Every [GitHub release](https://github.com/Query-farm/vgi-useragent/releases) shi
 INSTALL vgi FROM community;
 LOAD vgi;
 
-ATTACH 'useragent' AS useragent (TYPE vgi, LOCATION 'github-auto://Query-farm/vgi-useragent@v0.2.1');
+ATTACH 'useragent' AS useragent (TYPE vgi, LOCATION 'github-auto://Query-farm/vgi-useragent@v0.3.0');
 
 -- Extract the browser family from a desktop Chrome User-Agent.
 SELECT useragent.main.ua_browser('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
@@ -58,7 +58,7 @@ SELECT useragent.main.ua_browser('Mozilla/5.0 (Windows NT 10.0; Win64; x64) Appl
 SELECT useragent.main.ua_os('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1');
 ```
 
-Prebuilt binaries cover macOS (Apple silicon), Linux (x86-64 and arm64). `github-auto://` needs an explicit release tag; change `@v0.2.1` to move to a newer release.
+Prebuilt binaries cover macOS (Apple silicon), Linux (x86-64 and arm64). `github-auto://` needs an explicit release tag; change `@v0.3.0` to move to a newer release.
 
 ### Other ways to run it
 
