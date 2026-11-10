@@ -113,7 +113,12 @@ fn catalog_metadata(name: &str) -> CatalogModel {
         tags: vec![
             (
                 "vgi.title".to_string(),
-                "HTTP User-Agent Parsing & Bot Detection".to_string(),
+                "User-Agent Parser".to_string(),
+            ),
+            (
+                "vgi.subtitle".to_string(),
+                "Parse HTTP User-Agent strings into browser, OS and device fields, and detect bots."
+                    .to_string(),
             ),
             (
                 "vgi.keywords".to_string(),
@@ -204,7 +209,7 @@ fn catalog_metadata(name: &str) -> CatalogModel {
             path: Vec::new(),
             comment: Some("User-Agent parsing and bot-detection functions.".to_string()),
             tags: vec![
-                ("vgi.title".to_string(), "User-Agent — main".to_string()),
+                ("vgi.title".to_string(), "User-Agent Functions".to_string()),
                 (
                     "vgi.keywords".to_string(),
                     meta::keywords_json(
