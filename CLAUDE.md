@@ -14,7 +14,7 @@ text processing: the only non-trivial dep is `uaparser` (+ `once_cell`).
 ## Layout
 
 ```
-Cargo.toml                          workspace; pins vgi = "0.50.0", uaparser, once_cell
+Cargo.toml                          workspace; pins vgi = "0.51.0", uaparser, once_cell
 crates/useragent-worker/
   data/regexes.yaml                 uap-core regex DB (Apache-2.0), embedded via include_bytes!
   data/UAP-CORE-LICENSE             uap-core's Apache-2.0 license
