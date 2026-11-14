@@ -143,3 +143,7 @@ Written by [Query.Farm](https://query.farm).
 
 Copyright 2026 Query Farm LLC - https://query.farm
 
+
+## Notebooks
+
+[Executed SQL walkthrough](notebooks/README.md): count requests and distinct supplied User-Agent strings, preserve unknown headers, and audit bot-signature filtering with visualizations.
