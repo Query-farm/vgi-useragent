@@ -21,9 +21,11 @@ crates/useragent-worker/
   src/main.rs                       Worker::new(); registers scalars
   src/useragent.rs                  PURE logic (no Arrow): parser wrapper + field normalization + unit tests
   src/arrow_io.rs                   VARCHAR reads + ua_parse STRUCT type + in-process scalar test harness
+  src/composed.rs                   composed example queries (2+ scalars per query), defined once; fed to schema + driving scalar example lists
   src/scalar/{version,fields,parse,mod}.rs   thin Arrow scalar adapters
   tests/parse.rs                    integration tests (include useragent.rs by #[path], like vgi-ioc)
 test/sql/*.test                     haybarn-unittest sqllogictest — authoritative E2E
+                                    (composed.test runs the composed examples + human_requests_per_os grader verbatim)
 Makefile                            test / test-unit / test-sql / lint / fmt / build / clean
 ```
 

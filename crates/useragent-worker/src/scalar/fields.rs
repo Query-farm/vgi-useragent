@@ -17,6 +17,7 @@ use vgi::{ArgSpec, BindParams, BindResponse, FunctionMetadata, ProcessParams, Sc
 use vgi_rpc::{Result, RpcError};
 
 use crate::arrow_io::text_str;
+use crate::composed;
 use crate::useragent;
 
 /// Which VARCHAR field a [`UaField`] scalar extracts.
@@ -99,11 +100,20 @@ impl Field {
                 "Extract the device brand from a User-Agent (NULL for a generic desktop).",
             ),
         };
-        serde_json::json!([{
+        let mut list = vec![serde_json::json!({
             "description": description,
             "sql": format!("SELECT useragent.main.{fn_name}('{CHROME_WIN}')"),
-        }])
-        .to_string()
+        })];
+        // The composed analytics query this field's scalar drives, if any
+        // (also listed at schema level; defined once in `composed.rs`).
+        let driven = match self {
+            Field::BrowserVersion => Some(&composed::OUTDATED_CHROME),
+            Field::OsVersion => Some(&composed::IOS_VERSION_ADOPTION),
+            Field::DeviceBrand => Some(&composed::DEVICE_BRAND_MODELS),
+            Field::Browser | Field::Os | Field::Device => None,
+        };
+        list.extend(driven.map(|e| e.json()));
+        serde_json::Value::Array(list).to_string()
     }
 
     /// The five standard per-object discovery/description tags for this field's
@@ -336,11 +346,20 @@ impl ScalarFunction for UaIsBot {
         );
         tags.push((
             "vgi.example_queries".to_string(),
-            serde_json::json!([{
-                "description": "Detect that the Googlebot crawler User-Agent is a bot (returns true).",
-                "sql": "SELECT useragent.main.ua_is_bot('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')",
-            }])
+            serde_json::json!([
+                {
+                    "description": "Detect that the Googlebot crawler User-Agent is a bot (returns true).",
+                    "sql": "SELECT useragent.main.ua_is_bot('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')",
+                },
+                composed::HUMAN_BROWSER_SHARE.json(),
+            ])
             .to_string(),
+        ));
+        // VGI509: the composed bot-filtered breakdown is offline and
+        // deterministic (inline VALUES), so it is also guaranteed-runnable.
+        tags.push((
+            "vgi.executable_examples".to_string(),
+            serde_json::json!([composed::HUMAN_BROWSER_SHARE.json()]).to_string(),
         ));
         FunctionMetadata {
             description:

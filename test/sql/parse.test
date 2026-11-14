@@ -82,6 +82,14 @@ SELECT (ua_parse(NULL)).os AS os, (ua_parse(NULL)).is_bot AS is_bot;
 ----
 NULL	NULL
 
+# Non-NULL but unparseable input → a non-NULL row of NULL fields, is_bot false
+# (only a NULL input gives a NULL struct row).
+query IITI
+SELECT ua_parse('garbage') IS NULL AS row_is_null, ua_parse('') IS NULL AS empty_is_null,
+       (ua_parse('garbage')).browser AS browser, (ua_parse('garbage')).is_bot AS is_bot;
+----
+false	false	NULL	false
+
 statement ok
 USE memory;
 

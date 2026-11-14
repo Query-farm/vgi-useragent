@@ -24,6 +24,7 @@
 //! adapters over it. The parser is compiled exactly once per process.
 
 mod arrow_io;
+mod composed;
 mod meta;
 mod scalar;
 mod useragent;
@@ -74,6 +75,10 @@ const AGENT_TEST_TASKS: &str = r#"[
   {
     "name": "device_model",
     "prompt": "What device family/model does the User-Agent 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1' identify? Return a single value."
+  },
+  {
+    "name": "human_requests_per_os",
+    "prompt": "A request log contains exactly these five User-Agent strings, one request each: 'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.71 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'; 'Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)'; 'Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'; 'Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'; 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15'. Excluding bot/crawler traffic, count the human requests per operating-system family, skipping requests whose operating system cannot be identified. Return two columns: os (VARCHAR, the OS family name) and requests (BIGINT), one row per OS family, ordered by os ascending."
   }
 ]"#;
 
@@ -259,10 +264,12 @@ fn catalog_metadata(name: &str) -> CatalogModel {
                         .to_string(),
                 ),
                 // VGI506/VGI515: representative example queries for the schema, as a
-                // JSON list of {description, sql} so each carries a description.
+                // JSON list of {description, sql} so each carries a description —
+                // the single-function basics followed by the composed analytics
+                // queries (defined once in `composed.rs`).
                 (
                     "vgi.example_queries".to_string(),
-                    SCHEMA_EXAMPLE_QUERIES.to_string(),
+                    composed::append_examples(SCHEMA_EXAMPLE_QUERIES, &composed::ALL),
                 ),
             ],
             views: Vec::new(),

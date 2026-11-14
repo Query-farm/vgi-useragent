@@ -1,7 +1,8 @@
 //! `ua_parse(ua)` → `STRUCT(browser VARCHAR, browser_version VARCHAR,
 //! os VARCHAR, os_version VARCHAR, device VARCHAR, brand VARCHAR,
 //! is_bot BOOLEAN)`. A one-shot parse: every field computed from a single pass
-//! over the UA string. NULL / empty / unparseable input → a NULL struct row.
+//! over the UA string. NULL input → a NULL struct row; empty / unparseable input
+//! → a non-NULL row whose string fields are NULL and `is_bot` is false.
 
 use std::sync::Arc;
 
@@ -68,15 +69,16 @@ impl ScalarFunction for UaParse {
              the \
              individual `ua_*` accessors when you need several fields, since it parses the string \
              only once. Project with `(ua_parse(ua)).*` or pick fields like \
-             `(ua_parse(ua)).os`.\n\n**Edge cases:** `NULL`, empty, or unparseable input yields \
-             a `NULL` struct row. For bots, `device` and `brand` are suppressed to `NULL` while \
+             `(ua_parse(ua)).os`.\n\n**Edge cases:** `NULL` input yields a `NULL` struct row; \
+             empty or unparseable input yields a non-`NULL` row whose string fields are \
+             `NULL` and whose `is_bot` is `FALSE`. For bots, `device` and `brand` are suppressed to `NULL` while \
              `is_bot` is `TRUE`. Unidentified individual fields are `NULL` rather than `'Other'`.",
             "# Parse all fields\n\n`ua_parse(ua)` returns a `STRUCT` with every parsed User-Agent \
              field in one pass. Project all fields with `(ua_parse(ua)).*`, or pick individual \
              fields like `(ua_parse(ua)).browser`.\n\n## Struct shape\n\n`STRUCT(browser, \
              browser_version, os, os_version, device, brand, is_bot)`\n\n## Notes\n\n- More \
-             efficient than calling each `ua_*` accessor separately.\n- `NULL`/unparseable input \
-             yields a `NULL` row.",
+             efficient than calling each `ua_*` accessor separately.\n- `NULL` input yields a \
+             `NULL` row; unparseable input yields a row of `NULL` fields with `is_bot = false`.",
             "ua_parse, parse user-agent, user agent struct, browser, os, device, brand, is_bot, \
              one-shot parse, struct",
             "Full Parse",
@@ -85,7 +87,7 @@ impl ScalarFunction for UaParse {
         tags.push(("vgi.example_queries".into(), EXAMPLE_QUERIES.into()));
         FunctionMetadata {
             description: "Parse a User-Agent into STRUCT(browser, browser_version, os, \
-                          os_version, device, brand, is_bot); NULL/unparseable → NULL row"
+                          os_version, device, brand, is_bot); NULL → NULL row, unparseable → NULL fields"
                 .into(),
             tags,
             return_type: Some(parse_struct_type()),

@@ -30,3 +30,9 @@ tasks:
   - name: "device_model"
     reference_sql: "SELECT useragent.main.ua_device('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1')"
     ignore_column_names: true
+  # Composed: ua_is_bot must filter the Googlebot-smartphone UA (whose OS is
+  # Android) before grouping by ua_os — skipping the bot filter yields Android 3
+  # instead of 2 and fails the exact compare. Offline + deterministic.
+  - name: "human_requests_per_os"
+    reference_sql: "SELECT useragent.main.ua_os(ua) AS os, count(*) AS requests FROM (VALUES ('Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.71 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'), ('Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)'), ('Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'), ('Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'), ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15')) AS hits(ua) WHERE NOT useragent.main.ua_is_bot(ua) AND useragent.main.ua_os(ua) IS NOT NULL GROUP BY os ORDER BY os"
+    ignore_column_names: true

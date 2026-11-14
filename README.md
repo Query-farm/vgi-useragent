@@ -39,6 +39,14 @@ SELECT ua_is_bot('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com
 -- One-shot parse into a STRUCT.
 SELECT (ua_parse(ua)).*  FROM hits;
 -- browser | browser_version | os | os_version | device | brand | is_bot
+
+-- Combine them: human traffic per browser, with crawlers filtered out.
+SELECT ua_browser(ua) AS browser, count(*) AS requests
+FROM hits
+WHERE NOT ua_is_bot(ua)
+GROUP BY browser
+ORDER BY requests DESC, browser;
+-- browser | requests
 ```
 
 ## Quick start
