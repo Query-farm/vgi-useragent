@@ -1,0 +1,588 @@
+{
+  "schema_version": 1,
+  "status": "met",
+  "meets_target": true,
+  "catalogs": {
+    "released": {
+      "catalog_status": "verified",
+      "revision": "v0.4.0",
+      "catalog_sha256": "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61",
+      "collection_reconciled": true,
+      "denominator": 8,
+      "observed_objects": 8,
+      "required": 8,
+      "verified_count": 8,
+      "candidate_count": 0,
+      "fraction": 1.0,
+      "meets_target": true,
+      "exact_runtime_count": 8,
+      "runtime_revisions": [
+        "v0.4.0"
+      ],
+      "covered": [
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_browser"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_browser_version"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_device"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_device_brand"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_is_bot"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_os"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_os_version"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_parse"
+        }
+      ],
+      "uncovered": [],
+      "objects": [
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_browser",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "ua_browser(ua ANY) -> VARCHAR"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_browser_version",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "ua_browser_version(ua ANY) -> VARCHAR"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_device",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "ua_device(ua ANY) -> VARCHAR"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_device_brand",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "ua_device_brand(ua ANY) -> VARCHAR"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_is_bot",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "ua_is_bot(ua ANY) -> BOOLEAN"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_os",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "ua_os(ua ANY) -> VARCHAR"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_os_version",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "ua_os_version(ua ANY) -> VARCHAR"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_parse",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "ua_parse(ua ANY) -> STRUCT(browser VARCHAR, browser_version VARCHAR, os VARCHAR, os_version VARCHAR, device VARCHAR, brand VARCHAR, is_bot BOOLEAN)"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        }
+      ],
+      "issues": []
+    },
+    "current": {
+      "catalog_status": "verified",
+      "revision": "f7c1ac16b366d8478afc7c919b7da61f0fbf924f",
+      "catalog_sha256": "fc5be0054a7c649e637a735f992b9d9cb8c631384aa87416f6914c4ad668c900",
+      "collection_reconciled": true,
+      "denominator": 8,
+      "observed_objects": 8,
+      "required": 8,
+      "verified_count": 8,
+      "candidate_count": 0,
+      "fraction": 1.0,
+      "meets_target": true,
+      "exact_runtime_count": 0,
+      "runtime_revisions": [
+        "v0.4.0"
+      ],
+      "covered": [
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_browser"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_browser_version"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_device"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_device_brand"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_is_bot"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_os"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_os_version"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_parse"
+        }
+      ],
+      "uncovered": [],
+      "objects": [
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_browser",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "ua_browser(ua ANY) -> VARCHAR"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_browser_version",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "ua_browser_version(ua ANY) -> VARCHAR"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_device",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "ua_device(ua ANY) -> VARCHAR"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_device_brand",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "ua_device_brand(ua ANY) -> VARCHAR"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_is_bot",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "ua_is_bot(ua ANY) -> BOOLEAN"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_os",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "ua_os(ua ANY) -> VARCHAR"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_os_version",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "ua_os_version(ua ANY) -> VARCHAR"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "ua_parse",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "ua_parse(ua ANY) -> STRUCT(browser VARCHAR, browser_version VARCHAR, os VARCHAR, os_version VARCHAR, device VARCHAR, brand VARCHAR, is_bot BOOLEAN)"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        }
+      ],
+      "issues": []
+    }
+  },
+  "interface_drift": {
+    "known": true,
+    "current_only": [],
+    "released_only": [],
+    "changed": []
+  },
+  "notebooks": {
+    "01_count_requests_without_inventing_identities.ipynb": {
+      "verified": true,
+      "issues": []
+    }
+  },
+  "examples": [
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "ua_parse"
+      },
+      "notebook": "01_count_requests_without_inventing_identities.ipynb",
+      "runtime_revision": "v0.4.0",
+      "runtime_catalog_sha256": "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61"
+    },
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "ua_browser"
+      },
+      "notebook": "01_count_requests_without_inventing_identities.ipynb",
+      "runtime_revision": "v0.4.0",
+      "runtime_catalog_sha256": "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61"
+    },
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "ua_browser_version"
+      },
+      "notebook": "01_count_requests_without_inventing_identities.ipynb",
+      "runtime_revision": "v0.4.0",
+      "runtime_catalog_sha256": "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61"
+    },
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "ua_os"
+      },
+      "notebook": "01_count_requests_without_inventing_identities.ipynb",
+      "runtime_revision": "v0.4.0",
+      "runtime_catalog_sha256": "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61"
+    },
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "ua_os_version"
+      },
+      "notebook": "01_count_requests_without_inventing_identities.ipynb",
+      "runtime_revision": "v0.4.0",
+      "runtime_catalog_sha256": "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61"
+    },
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "ua_device"
+      },
+      "notebook": "01_count_requests_without_inventing_identities.ipynb",
+      "runtime_revision": "v0.4.0",
+      "runtime_catalog_sha256": "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61"
+    },
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "ua_device_brand"
+      },
+      "notebook": "01_count_requests_without_inventing_identities.ipynb",
+      "runtime_revision": "v0.4.0",
+      "runtime_catalog_sha256": "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61"
+    },
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "ua_is_bot"
+      },
+      "notebook": "01_count_requests_without_inventing_identities.ipynb",
+      "runtime_revision": "v0.4.0",
+      "runtime_catalog_sha256": "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61"
+    }
+  ],
+  "issues": []
+}

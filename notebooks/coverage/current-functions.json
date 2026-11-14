@@ -1,0 +1,302 @@
+{
+  "query": "SELECT * FROM duckdb_functions() WHERE database_name='useragent' ORDER BY schema_name,function_name",
+  "columns": [
+    "database_name",
+    "database_oid",
+    "schema_name",
+    "function_name",
+    "alias_of",
+    "function_type",
+    "description",
+    "comment",
+    "tags",
+    "return_type",
+    "parameters",
+    "parameter_types",
+    "varargs",
+    "macro_definition",
+    "has_side_effects",
+    "internal",
+    "extension_name",
+    "function_oid",
+    "examples",
+    "stability",
+    "categories"
+  ],
+  "rows": [
+    [
+      "useragent",
+      "22592",
+      "main",
+      "ua_browser",
+      null,
+      "scalar",
+      "Browser/client family from a User-Agent (e.g. 'Chrome'), or NULL",
+      null,
+      {
+        "vgi.category": "Browser",
+        "vgi.doc_llm": "## ua_browser\n\nExtracts the **browser / client family** from an HTTP `User-Agent` header string and returns it as a `VARCHAR`.\n\n**When to use:** segment web-analytics traffic by browser, build top-browser reports, or filter rows to a specific client. Pair with `ua_browser_version` for the full client identity.\n\n**Input:** one `ua VARCHAR` column or literal (positional, arity-1).\n**Output:** the family name such as `Chrome`, `Safari`, `Firefox`, `Edge`, or `Mobile Safari`.\n\n**Edge cases:** `NULL`, empty, or unidentifiable input returns `NULL` (never the literal `'Other'`). Identification comes from the embedded uap-core regex database, so very new or obscure clients may not match.",
+        "vgi.doc_md": "# Browser family\n\n`ua_browser(ua)` returns the browser/client family parsed from a User-Agent string \u2014 values such as `Chrome`, `Safari`, or `Firefox`.\n\n## Notes\n\n- `NULL`/empty/unknown input yields `NULL`.\n- Use `ua_browser_version` for the version component.",
+        "vgi.example_queries": "[{\"description\":\"Extract the browser family ('Chrome') from a User-Agent.\",\"sql\":\"SELECT useragent.main.ua_browser('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')\"}]",
+        "vgi.keywords": "[\"browser\",\"client\",\"browser family\",\"chrome\",\"safari\",\"firefox\",\"edge\",\"ua_browser\",\"user-agent\"]",
+        "vgi.title": "Browser Family Name"
+      },
+      "VARCHAR",
+      [
+        "ua"
+      ],
+      [
+        "ANY"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22726,
+      [],
+      "CONSISTENT",
+      []
+    ],
+    [
+      "useragent",
+      "22592",
+      "main",
+      "ua_browser_version",
+      null,
+      "scalar",
+      "Browser version from a User-Agent (e.g. '120.0.0'), or NULL",
+      null,
+      {
+        "vgi.category": "Browser",
+        "vgi.doc_llm": "## ua_browser_version\n\nExtracts the **browser / client version** from an HTTP `User-Agent` header and returns it as a dotted `VARCHAR` (for example `120.0.0`).\n\n**When to use:** track adoption of browser releases, gate features by minimum version, or detect outdated clients in web-analytics data.\n\n**Input:** one `ua VARCHAR` column or literal.\n**Output:** a `major.minor.patch` string assembled from the components uap-core reports; only the leading run of present components is kept.\n\n**Edge cases:** `NULL`, empty, unparseable, or version-less input returns `NULL`. Version numbers track the embedded uap-core database and can drift across releases, so prefer ranges over exact-equality comparisons.",
+        "vgi.doc_md": "# Browser version\n\n`ua_browser_version(ua)` returns the dotted browser version parsed from a User-Agent string (for example `120.0.0`).\n\n## Notes\n\n- `NULL`/empty/version-less input yields `NULL`.\n- Versions may drift with uap-core updates; compare with ranges, not exact equality.",
+        "vgi.example_queries": "[{\"description\":\"Extract the browser version ('120.0.0') from a User-Agent.\",\"sql\":\"SELECT useragent.main.ua_browser_version('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')\"},{\"description\":\"Find visitors on an outdated Chrome: keep rows whose ua_browser is 'Chrome' and whose ua_browser_version major number is below 110 (returns the Chrome 96 request with version '96.0.4664'; Chrome 120 and Firefox are excluded).\",\"sql\":\"SELECT ua, useragent.main.ua_browser_version(ua) AS chrome_version FROM (VALUES ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'), ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36'), ('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0')) AS hits(ua) WHERE useragent.main.ua_browser(ua) = 'Chrome' AND TRY_CAST(split_part(useragent.main.ua_browser_version(ua), '.', 1) AS INTEGER) < 110 ORDER BY ua\"}]",
+        "vgi.keywords": "[\"browser version\",\"client version\",\"version number\",\"ua_browser_version\",\"user-agent\"]",
+        "vgi.title": "Browser Version String"
+      },
+      "VARCHAR",
+      [
+        "ua"
+      ],
+      [
+        "ANY"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22727,
+      [],
+      "CONSISTENT",
+      []
+    ],
+    [
+      "useragent",
+      "22592",
+      "main",
+      "ua_device",
+      null,
+      "scalar",
+      "Device family/model from a User-Agent (e.g. 'iPhone'), or NULL",
+      null,
+      {
+        "vgi.category": "Device",
+        "vgi.doc_llm": "## ua_device\n\nExtracts the **device family / model** from an HTTP `User-Agent` header and returns it as a `VARCHAR` (for example `iPhone` or `Pixel 7`).\n\n**When to use:** segment traffic by hardware, build device-popularity reports, or distinguish mobile from desktop. Pair with `ua_device_brand` for the manufacturer.\n\n**Input:** one `ua VARCHAR` column or literal.\n**Output:** a device family/model string.\n\n**Edge cases:** generic desktop browsers, bots, and unidentifiable input return `NULL` \u2014 desktop User-Agents typically carry no device signal. For bots, the device is deliberately suppressed to `NULL` (use `ua_is_bot` instead).",
+        "vgi.doc_md": "# Device family\n\n`ua_device(ua)` returns the device family/model parsed from a User-Agent string (for example `iPhone` or `Pixel 7`).\n\n## Notes\n\n- `NULL` for generic desktops, bots, and unknown devices.\n- Use `ua_device_brand` for the manufacturer.",
+        "vgi.example_queries": "[{\"description\":\"Extract the device family from a User-Agent (NULL for a generic desktop).\",\"sql\":\"SELECT useragent.main.ua_device('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')\"}]",
+        "vgi.keywords": "[\"device\",\"device family\",\"model\",\"phone\",\"tablet\",\"iphone\",\"pixel\",\"ua_device\",\"user-agent\"]",
+        "vgi.title": "Device Family Model"
+      },
+      "VARCHAR",
+      [
+        "ua"
+      ],
+      [
+        "ANY"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22728,
+      [],
+      "CONSISTENT",
+      []
+    ],
+    [
+      "useragent",
+      "22592",
+      "main",
+      "ua_device_brand",
+      null,
+      "scalar",
+      "Device brand from a User-Agent (e.g. 'Apple'), or NULL",
+      null,
+      {
+        "vgi.category": "Device",
+        "vgi.doc_llm": "## ua_device_brand\n\nExtracts the **device brand / manufacturer** from an HTTP `User-Agent` header and returns it as a `VARCHAR` (for example `Apple`, `Samsung`, or `Google`).\n\n**When to use:** group traffic by vendor, build manufacturer market-share reports, or join against a hardware catalog. Pair with `ua_device` for the specific model.\n\n**Input:** one `ua VARCHAR` column or literal.\n**Output:** the brand/manufacturer name.\n\n**Edge cases:** generic desktop browsers, bots, and unidentifiable input return `NULL`; brand is suppressed to `NULL` for bots.",
+        "vgi.doc_md": "# Device brand\n\n`ua_device_brand(ua)` returns the device brand/manufacturer parsed from a User-Agent string (for example `Apple`, `Samsung`, or `Google`).\n\n## Notes\n\n- `NULL` for generic desktops, bots, and unknown brands.\n- Use `ua_device` for the specific model.",
+        "vgi.example_queries": "[{\"description\":\"Extract the device brand from a User-Agent (NULL for a generic desktop).\",\"sql\":\"SELECT useragent.main.ua_device_brand('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')\"},{\"description\":\"Hardware breakdown: count requests per ua_device_brand and ua_device model, skipping traffic with no identifiable brand such as a generic Windows desktop (Apple iPhone, Google Pixel 7, Samsung SM-S911B; 1 request each).\",\"sql\":\"SELECT useragent.main.ua_device_brand(ua) AS brand, useragent.main.ua_device(ua) AS device, count(*) AS requests FROM (VALUES ('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'), ('Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'), ('Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'), ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')) AS hits(ua) WHERE useragent.main.ua_device_brand(ua) IS NOT NULL GROUP BY brand, device ORDER BY brand, device\"}]",
+        "vgi.keywords": "[\"device brand\",\"manufacturer\",\"maker\",\"apple\",\"samsung\",\"google\",\"ua_device_brand\",\"user-agent\"]",
+        "vgi.title": "Device Brand Maker"
+      },
+      "VARCHAR",
+      [
+        "ua"
+      ],
+      [
+        "ANY"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22729,
+      [],
+      "CONSISTENT",
+      []
+    ],
+    [
+      "useragent",
+      "22592",
+      "main",
+      "ua_is_bot",
+      null,
+      "scalar",
+      "True if the User-Agent is a spider/crawler (e.g. Googlebot), else false; NULL in \u2192 NULL out",
+      null,
+      {
+        "vgi.category": "Bot Detection",
+        "vgi.doc_llm": "## ua_is_bot\n\nReturns a `BOOLEAN` that is `TRUE` when an HTTP `User-Agent` string identifies a **spider / crawler / bot** (for example Googlebot, Bingbot, or other automated agents) and `FALSE` for ordinary human browsers.\n\n**When to use:** filter automated traffic out of web-analytics aggregates, route bot requests differently, or compute a human-vs-bot split. A typical pattern is `WHERE NOT ua_is_bot(ua)` to keep only real visitors.\n\n**Input:** one `ua VARCHAR` column or literal.\n**Output:** `TRUE`/`FALSE`, or `NULL` when the input is `NULL`.\n\n**How it works:** detection is driven by the embedded uap-core regex database, which classifies crawlers under the device family `Spider`. Unrecognized agents are treated as non-bots (`FALSE`).",
+        "vgi.doc_md": "# Bot detection\n\n`ua_is_bot(ua)` returns `TRUE` for spiders/crawlers and `FALSE` for ordinary browsers. A common pattern is `WHERE NOT ua_is_bot(ua)` to keep only human traffic.\n\n## Notes\n\n- `NULL` input yields `NULL`.\n- Backed by uap-core's `Spider` device family.",
+        "vgi.example_queries": "[{\"description\":\"Detect that the Googlebot crawler User-Agent is a bot (returns true).\",\"sql\":\"SELECT useragent.main.ua_is_bot('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')\"},{\"description\":\"Web-analytics browser breakdown: filter crawlers out of a request log with ua_is_bot, then count the remaining human requests per ua_browser family (Googlebot and Bingbot are dropped; Chrome 2, Mobile Safari 1).\",\"sql\":\"SELECT useragent.main.ua_browser(ua) AS browser, count(*) AS requests FROM (VALUES ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'), ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'), ('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'), ('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'), ('Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)')) AS hits(ua) WHERE NOT useragent.main.ua_is_bot(ua) GROUP BY browser ORDER BY requests DESC, browser\"}]",
+        "vgi.executable_examples": "[{\"description\":\"Web-analytics browser breakdown: filter crawlers out of a request log with ua_is_bot, then count the remaining human requests per ua_browser family (Googlebot and Bingbot are dropped; Chrome 2, Mobile Safari 1).\",\"sql\":\"SELECT useragent.main.ua_browser(ua) AS browser, count(*) AS requests FROM (VALUES ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'), ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'), ('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'), ('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'), ('Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)')) AS hits(ua) WHERE NOT useragent.main.ua_is_bot(ua) GROUP BY browser ORDER BY requests DESC, browser\"}]",
+        "vgi.keywords": "[\"bot\",\"crawler\",\"spider\",\"googlebot\",\"bingbot\",\"robot\",\"automated traffic\",\"filter\",\"ua_is_bot\",\"user-agent\"]",
+        "vgi.title": "Detect Bot Crawler"
+      },
+      "BOOLEAN",
+      [
+        "ua"
+      ],
+      [
+        "ANY"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22730,
+      [],
+      "CONSISTENT",
+      []
+    ],
+    [
+      "useragent",
+      "22592",
+      "main",
+      "ua_os",
+      null,
+      "scalar",
+      "Operating-system family from a User-Agent (e.g. 'Windows', 'iOS'), or NULL",
+      null,
+      {
+        "vgi.category": "Operating System",
+        "vgi.doc_llm": "## ua_os\n\nExtracts the **operating-system family** from an HTTP `User-Agent` header and returns it as a `VARCHAR`.\n\n**When to use:** break web traffic down by platform (Windows vs. iOS vs. Android), build OS-mix dashboards, or filter rows by platform. Pair with `ua_os_version` for the full OS identity.\n\n**Input:** one `ua VARCHAR` column or literal.\n**Output:** a family name such as `Windows`, `iOS`, `Android`, `Mac OS X`, or `Linux`.\n\n**Edge cases:** `NULL`, empty, or unidentifiable input returns `NULL` (never `'Other'`).",
+        "vgi.doc_md": "# Operating system\n\n`ua_os(ua)` returns the operating-system family parsed from a User-Agent string \u2014 values such as `Windows`, `iOS`, or `Android`.\n\n## Notes\n\n- `NULL`/empty/unknown input yields `NULL`.\n- Use `ua_os_version` for the version component.",
+        "vgi.example_queries": "[{\"description\":\"Extract the operating-system family ('Windows') from a User-Agent.\",\"sql\":\"SELECT useragent.main.ua_os('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')\"}]",
+        "vgi.keywords": "[\"os\",\"operating system\",\"platform\",\"windows\",\"ios\",\"android\",\"macos\",\"linux\",\"ua_os\",\"user-agent\"]",
+        "vgi.title": "Operating System Name"
+      },
+      "VARCHAR",
+      [
+        "ua"
+      ],
+      [
+        "ANY"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22731,
+      [],
+      "CONSISTENT",
+      []
+    ],
+    [
+      "useragent",
+      "22592",
+      "main",
+      "ua_os_version",
+      null,
+      "scalar",
+      "Operating-system version from a User-Agent (e.g. '17.0'), or NULL",
+      null,
+      {
+        "vgi.category": "Operating System",
+        "vgi.doc_llm": "## ua_os_version\n\nExtracts the **operating-system version** from an HTTP `User-Agent` header and returns it as a dotted `VARCHAR` (for example `17.0` or `10`).\n\n**When to use:** measure OS upgrade adoption, detect end-of-life platforms, or correlate behavior with platform version in web analytics.\n\n**Input:** one `ua VARCHAR` column or literal.\n**Output:** a dotted version string assembled from the components uap-core reports.\n\n**Edge cases:** `NULL`, empty, unparseable, or version-less input returns `NULL`. Values track the embedded uap-core database; prefer ranges over exact comparisons.",
+        "vgi.doc_md": "# Operating-system version\n\n`ua_os_version(ua)` returns the dotted OS version parsed from a User-Agent string (for example `17.0` or `10`).\n\n## Notes\n\n- `NULL`/empty/version-less input yields `NULL`.\n- Versions may drift with uap-core updates.",
+        "vgi.example_queries": "[{\"description\":\"Extract the operating-system version ('10') from a User-Agent.\",\"sql\":\"SELECT useragent.main.ua_os_version('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')\"},{\"description\":\"iOS version adoption: keep requests whose ua_os is 'iOS' (iPhone and iPad alike, Android dropped) and count them per ua_os_version (16.6 \u2192 1, 17.0 \u2192 2).\",\"sql\":\"SELECT useragent.main.ua_os_version(ua) AS ios_version, count(*) AS requests FROM (VALUES ('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'), ('Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1'), ('Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'), ('Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36')) AS hits(ua) WHERE useragent.main.ua_os(ua) = 'iOS' GROUP BY ios_version ORDER BY ios_version\"}]",
+        "vgi.keywords": "[\"os version\",\"operating system version\",\"platform version\",\"ua_os_version\",\"user-agent\"]",
+        "vgi.title": "Operating System Version"
+      },
+      "VARCHAR",
+      [
+        "ua"
+      ],
+      [
+        "ANY"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22732,
+      [],
+      "CONSISTENT",
+      []
+    ],
+    [
+      "useragent",
+      "22592",
+      "main",
+      "ua_parse",
+      null,
+      "scalar",
+      "Parse a User-Agent into STRUCT(browser, browser_version, os, os_version, device, brand, is_bot); NULL \u2192 NULL row, unparseable \u2192 NULL fields",
+      null,
+      {
+        "vgi.category": "Full Parse",
+        "vgi.doc_llm": "## ua_parse\n\nParses an HTTP `User-Agent` string into a **single `STRUCT`** containing every component at once, in one pass over the input.\n\n**Returned struct fields:**\n\n- `browser` (`VARCHAR`) \u2014 client family\n- `browser_version` (`VARCHAR`) \u2014 dotted client version\n- `os` (`VARCHAR`) \u2014 operating-system family\n- `os_version` (`VARCHAR`) \u2014 dotted OS version\n- `device` (`VARCHAR`) \u2014 device family/model\n- `brand` (`VARCHAR`) \u2014 device brand/manufacturer\n- `is_bot` (`BOOLEAN`) \u2014 spider/crawler flag\n\n**When to use:** prefer `ua_parse` over calling the individual `ua_*` accessors when you need several fields, since it parses the string only once. Project with `(ua_parse(ua)).*` or pick fields like `(ua_parse(ua)).os`.\n\n**Edge cases:** `NULL` input yields a `NULL` struct row; empty or unparseable input yields a non-`NULL` row whose string fields are `NULL` and whose `is_bot` is `FALSE`. For bots, `device` and `brand` are suppressed to `NULL` while `is_bot` is `TRUE`. Unidentified individual fields are `NULL` rather than `'Other'`.",
+        "vgi.doc_md": "# Parse all fields\n\n`ua_parse(ua)` returns a `STRUCT` with every parsed User-Agent field in one pass. Project all fields with `(ua_parse(ua)).*`, or pick individual fields like `(ua_parse(ua)).browser`.\n\n## Struct shape\n\n`STRUCT(browser, browser_version, os, os_version, device, brand, is_bot)`\n\n## Notes\n\n- More efficient than calling each `ua_*` accessor separately.\n- `NULL` input yields a `NULL` row; unparseable input yields a row of `NULL` fields with `is_bot = false`.",
+        "vgi.example_queries": "[\n  {\n    \"description\": \"Parse an iPhone Safari User-Agent into all of its fields at once (browser, OS, device, brand, is_bot).\",\n    \"sql\": \"SELECT useragent.main.ua_parse('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1') AS parsed\"\n  }\n]",
+        "vgi.executable_examples": "[\n  {\n    \"description\": \"Extract the browser family from a desktop Chrome User-Agent.\",\n    \"sql\": \"SELECT useragent.main.ua_browser('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36') AS browser\"\n  },\n  {\n    \"description\": \"Extract the operating system from an iPhone Safari User-Agent.\",\n    \"sql\": \"SELECT useragent.main.ua_os('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1') AS os\"\n  },\n  {\n    \"description\": \"Detect that the Googlebot crawler is a bot.\",\n    \"sql\": \"SELECT useragent.main.ua_is_bot('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)') AS is_bot\"\n  },\n  {\n    \"description\": \"Parse every field of a Chrome-on-Windows User-Agent at once.\",\n    \"sql\": \"SELECT useragent.main.ua_parse('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36') AS parsed\"\n  }\n]",
+        "vgi.keywords": "[\"ua_parse\",\"parse user-agent\",\"user agent struct\",\"browser\",\"os\",\"device\",\"brand\",\"is_bot\",\"one-shot parse\",\"struct\"]",
+        "vgi.title": "Parse User-Agent Fields"
+      },
+      "STRUCT(browser VARCHAR, browser_version VARCHAR, os VARCHAR, os_version VARCHAR, device VARCHAR, brand VARCHAR, is_bot BOOLEAN)",
+      [
+        "ua"
+      ],
+      [
+        "ANY"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22733,
+      [],
+      "CONSISTENT",
+      []
+    ]
+  ]
+}

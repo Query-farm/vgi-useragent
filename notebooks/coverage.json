@@ -1,0 +1,318 @@
+{
+  "schema_version": 1,
+  "catalogs": {
+    "released": {
+      "path": "coverage/catalog-released.json",
+      "sha256": "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61",
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_ortools",
+        "reviewed_at": "2026-11-14T17:36:21.310491+00:00",
+        "catalog_sha256": "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61",
+        "notes": "Reviewed real full function and table exports: 8 scalar functions, zero tables; no authenticated or write surfaces omitted. Current runtime catalog and unchanged scalar/domain implementation agree with release public names/signatures."
+      }
+    },
+    "current": {
+      "path": "coverage/catalog-current.json",
+      "sha256": "fc5be0054a7c649e637a735f992b9d9cb8c631384aa87416f6914c4ad668c900",
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_ortools",
+        "reviewed_at": "2026-11-14T17:36:21.310491+00:00",
+        "catalog_sha256": "fc5be0054a7c649e637a735f992b9d9cb8c631384aa87416f6914c4ad668c900",
+        "notes": "Reviewed real full function and table exports: 8 scalar functions, zero tables; no authenticated or write surfaces omitted. Current runtime catalog and unchanged scalar/domain implementation agree with release public names/signatures."
+      }
+    }
+  },
+  "notebooks": [
+    {
+      "path": "01_count_requests_without_inventing_identities.ipynb",
+      "sha256": "863b620e5c2308605b3b817e5810a0116cd2d81dcd6efa07e8f732b7d0ef5b41",
+      "execution": {
+        "path": "coverage/run-01.json",
+        "sha256": "95bc364e52f533ab2ca112fa245ea3d458e6f418cd0be64dd4f44fc2654327ab"
+      }
+    }
+  ],
+  "examples": [
+    {
+      "object": {
+        "schema": "main",
+        "name": "ua_parse"
+      },
+      "notebook": "01_count_requests_without_inventing_identities.ipynb",
+      "sql": [
+        {
+          "cell": "257b3d98",
+          "reference": "useragent.main.ua_parse"
+        }
+      ],
+      "narrative_cells": [
+        "edd94fb1"
+      ],
+      "result_cells": [
+        "257b3d98"
+      ],
+      "interpretation_cells": [
+        "c547a98e"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_ortools",
+        "reviewed_at": "2026-11-14T17:36:21.310491+00:00",
+        "notebook_sha256": "863b620e5c2308605b3b817e5810a0116cd2d81dcd6efa07e8f732b7d0ef5b41",
+        "catalog_sha256": [
+          "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61",
+          "fc5be0054a7c649e637a735f992b9d9cb8c631384aa87416f6914c4ad668c900"
+        ],
+        "purpose": "Preserve one parse per distinct header and join requests back without inventing identities.",
+        "finding": "18 authored requests survive the NULL-safe dictionary join; missing input returns a NULL struct while empty/unknown supplied strings retain a non-NULL unrecognized struct."
+      }
+    },
+    {
+      "object": {
+        "schema": "main",
+        "name": "ua_browser"
+      },
+      "notebook": "01_count_requests_without_inventing_identities.ipynb",
+      "sql": [
+        {
+          "cell": "field-selectors",
+          "reference": "useragent.main.ua_browser"
+        }
+      ],
+      "narrative_cells": [
+        "field-question"
+      ],
+      "result_cells": [
+        "field-selectors",
+        "availability-interpretation"
+      ],
+      "interpretation_cells": [
+        "field-interpretation"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_ortools",
+        "reviewed_at": "2026-11-14T17:36:21.310491+00:00",
+        "notebook_sha256": "863b620e5c2308605b3b817e5810a0116cd2d81dcd6efa07e8f732b7d0ef5b41",
+        "catalog_sha256": [
+          "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61",
+          "fc5be0054a7c649e637a735f992b9d9cb8c631384aa87416f6914c4ad668c900"
+        ],
+        "purpose": "Compare browser family and version granularity in a request report.",
+        "finding": "Two Chrome version strings share one family. Browser family is available for 12 of 15 selected requests and agrees with the struct on all ten distinct inputs."
+      }
+    },
+    {
+      "object": {
+        "schema": "main",
+        "name": "ua_browser_version"
+      },
+      "notebook": "01_count_requests_without_inventing_identities.ipynb",
+      "sql": [
+        {
+          "cell": "field-selectors",
+          "reference": "useragent.main.ua_browser_version"
+        }
+      ],
+      "narrative_cells": [
+        "field-question"
+      ],
+      "result_cells": [
+        "field-selectors",
+        "availability-interpretation"
+      ],
+      "interpretation_cells": [
+        "field-interpretation"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_ortools",
+        "reviewed_at": "2026-11-14T17:36:21.310491+00:00",
+        "notebook_sha256": "863b620e5c2308605b3b817e5810a0116cd2d81dcd6efa07e8f732b7d0ef5b41",
+        "catalog_sha256": [
+          "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61",
+          "fc5be0054a7c649e637a735f992b9d9cb8c631384aa87416f6914c4ad668c900"
+        ],
+        "purpose": "Separate browser version strings from the family grouping.",
+        "finding": "Chrome 120.0.0 and 121.0.0 remain two versions in one Chrome family; repeated supplied strings count requests rather than visitors."
+      }
+    },
+    {
+      "object": {
+        "schema": "main",
+        "name": "ua_os"
+      },
+      "notebook": "01_count_requests_without_inventing_identities.ipynb",
+      "sql": [
+        {
+          "cell": "field-selectors",
+          "reference": "useragent.main.ua_os"
+        }
+      ],
+      "narrative_cells": [
+        "field-question"
+      ],
+      "result_cells": [
+        "field-selectors",
+        "availability-interpretation"
+      ],
+      "interpretation_cells": [
+        "availability-interpretation"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_ortools",
+        "reviewed_at": "2026-11-14T17:36:21.310491+00:00",
+        "notebook_sha256": "863b620e5c2308605b3b817e5810a0116cd2d81dcd6efa07e8f732b7d0ef5b41",
+        "catalog_sha256": [
+          "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61",
+          "fc5be0054a7c649e637a735f992b9d9cb8c631384aa87416f6914c4ad668c900"
+        ],
+        "purpose": "Measure which requests can support an OS-family report.",
+        "finding": "10 of 15 selected requests have an OS family; browser recognition does not guarantee OS availability. All selector values agree with the full struct."
+      }
+    },
+    {
+      "object": {
+        "schema": "main",
+        "name": "ua_os_version"
+      },
+      "notebook": "01_count_requests_without_inventing_identities.ipynb",
+      "sql": [
+        {
+          "cell": "field-selectors",
+          "reference": "useragent.main.ua_os_version"
+        }
+      ],
+      "narrative_cells": [
+        "field-question"
+      ],
+      "result_cells": [
+        "field-selectors",
+        "availability-interpretation"
+      ],
+      "interpretation_cells": [
+        "field-interpretation"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_ortools",
+        "reviewed_at": "2026-11-14T17:36:21.310491+00:00",
+        "notebook_sha256": "863b620e5c2308605b3b817e5810a0116cd2d81dcd6efa07e8f732b7d0ef5b41",
+        "catalog_sha256": [
+          "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61",
+          "fc5be0054a7c649e637a735f992b9d9cb8c631384aa87416f6914c4ad668c900"
+        ],
+        "purpose": "Keep OS family known while version remains missing.",
+        "finding": "Linux has a family without a version: 10 selected requests have an OS family but only 9 have an OS version; missing versions are not filled."
+      }
+    },
+    {
+      "object": {
+        "schema": "main",
+        "name": "ua_device"
+      },
+      "notebook": "01_count_requests_without_inventing_identities.ipynb",
+      "sql": [
+        {
+          "cell": "field-selectors",
+          "reference": "useragent.main.ua_device"
+        }
+      ],
+      "narrative_cells": [
+        "field-question"
+      ],
+      "result_cells": [
+        "field-selectors",
+        "availability-interpretation"
+      ],
+      "interpretation_cells": [
+        "availability-interpretation"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_ortools",
+        "reviewed_at": "2026-11-14T17:36:21.310491+00:00",
+        "notebook_sha256": "863b620e5c2308605b3b817e5810a0116cd2d81dcd6efa07e8f732b7d0ef5b41",
+        "catalog_sha256": [
+          "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61",
+          "fc5be0054a7c649e637a735f992b9d9cb8c631384aa87416f6914c4ad668c900"
+        ],
+        "purpose": "Count usable device-model fields without assigning defaults to NULL.",
+        "finding": "Only the authored iPhone header returns a model, covering three selected requests. Generic desktop and bot device NULLs do not prove a device class."
+      }
+    },
+    {
+      "object": {
+        "schema": "main",
+        "name": "ua_device_brand"
+      },
+      "notebook": "01_count_requests_without_inventing_identities.ipynb",
+      "sql": [
+        {
+          "cell": "field-selectors",
+          "reference": "useragent.main.ua_device_brand"
+        }
+      ],
+      "narrative_cells": [
+        "field-question"
+      ],
+      "result_cells": [
+        "field-selectors",
+        "availability-interpretation"
+      ],
+      "interpretation_cells": [
+        "field-interpretation"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_ortools",
+        "reviewed_at": "2026-11-14T17:36:21.310491+00:00",
+        "notebook_sha256": "863b620e5c2308605b3b817e5810a0116cd2d81dcd6efa07e8f732b7d0ef5b41",
+        "catalog_sha256": [
+          "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61",
+          "fc5be0054a7c649e637a735f992b9d9cb8c631384aa87416f6914c4ad668c900"
+        ],
+        "purpose": "Interpret model and brand availability together.",
+        "finding": "The iPhone input returns Apple; the other nine distinct inputs have no brand. Both identified bot inputs have suppressed device/brand fields."
+      }
+    },
+    {
+      "object": {
+        "schema": "main",
+        "name": "ua_is_bot"
+      },
+      "notebook": "01_count_requests_without_inventing_identities.ipynb",
+      "sql": [
+        {
+          "cell": "field-selectors",
+          "reference": "useragent.main.ua_is_bot"
+        }
+      ],
+      "narrative_cells": [
+        "field-question"
+      ],
+      "result_cells": [
+        "field-selectors",
+        "availability-interpretation"
+      ],
+      "interpretation_cells": [
+        "field-interpretation"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_ortools",
+        "reviewed_at": "2026-11-14T17:36:21.310491+00:00",
+        "notebook_sha256": "863b620e5c2308605b3b817e5810a0116cd2d81dcd6efa07e8f732b7d0ef5b41",
+        "catalog_sha256": [
+          "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61",
+          "fc5be0054a7c649e637a735f992b9d9cb8c631384aa87416f6914c4ad668c900"
+        ],
+        "purpose": "Distinguish signature identification and NULL flags before bot filtering.",
+        "finding": "Two distinct spider signatures represent three requests; FALSE on curl/unknown does not establish a person, and the missing-header NULL is retained by IS DISTINCT FROM true."
+      }
+    }
+  ]
+}

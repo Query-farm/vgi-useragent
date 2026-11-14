@@ -146,4 +146,4 @@ Copyright 2026 Query Farm LLC - https://query.farm
 
 ## Notebooks
 
-[Executed SQL walkthrough](notebooks/README.md): count requests and distinct supplied User-Agent strings, preserve unknown headers, and audit bot-signature filtering with visualizations.
+[Executed SQL walkthrough](notebooks/README.md): count requests and distinct supplied User-Agent strings, preserve unknown headers, audit bot-signature filtering, and compare all eight SQL parsing surfaces with visualizations.

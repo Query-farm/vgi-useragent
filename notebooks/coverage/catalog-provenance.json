@@ -1,0 +1,14 @@
+{
+  "repository": "Query-farm/vgi-useragent",
+  "released_tag": "v0.4.0",
+  "released_revision": "018d85a9fa674117315e03d18482905b332762b5",
+  "current_public_revision": "f7c1ac16b366d8478afc7c919b7da61f0fbf924f",
+  "engine": "Haybarn 2.0.0rc11 / VGI e75482339d",
+  "released_launch": "github-auto://Query-farm/vgi-useragent@v0.4.0",
+  "current_collection": "Separate source-validation build of current public revision; not used by notebook launch.",
+  "current_binary_sha256": "8948790353b1b2d1fa2aba066fbd1aa5bd20ff25c59005929fdd9437fd688ff6",
+  "build_command": "cargo build --release --bin useragent-worker (unchanged Cargo.lock)",
+  "comparison": "Reviewed full worker source diff from v0.4.0 to current public revision: only composed example metadata/tasks were added; registrations, signatures and parser implementations are unchanged.",
+  "data_isolation": "Both probes used a fresh TemporaryDirectory secret_directory, allow_persistent_secrets=False and an empty duckdb_secrets() inventory before ATTACH.",
+  "captured_at": "2026-11-14T17:36:21.310491+00:00"
+}

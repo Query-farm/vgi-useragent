@@ -1,62 +1,72 @@
-# VGI User-Agent notebooks
+# User-Agent examples
 
-[01 · Count requests without inventing identities](01_count_requests_without_inventing_identities.ipynb) parses synthetic User-Agent strings, joins a distinct-string dictionary back to request rows, and compares requests with distinct nonempty strings. It preserves missing/empty/unrecognized headers and makes bot-signature filtering explicit.
+[01 · Count requests without inventing identities](01_count_requests_without_inventing_identities.ipynb)
+uses 18 synthetic requests built from ten authored header patterns. It compares
+requests with distinct nonempty header strings, preserves missing and unknown
+clients, and tests an explicit bot-signature policy. A field comparison shows when
+to use `ua_parse` or the seven individual selectors, including browser/OS versions,
+device/brand availability and NULL-safe agreement. No input comes from real users.
 
-## Run
+[Open in Colab](https://colab.research.google.com/github/Query-farm/vgi-useragent/blob/main/notebooks/01_count_requests_without_inventing_identities.ipynb),
+run the install cell, then **Run all**. The notebook contains its synthetic inputs;
+no clone or companion download is required. The install uses the base shared package
+and preserves compatible Colab plotting/data libraries. Hosted Colab itself has not
+been tested; a fresh Python 3.12 notebook-only execution and a preloaded-library
+compatibility check are recorded in validation evidence.
 
-Install [uv](https://docs.astral.sh/uv/). From the repository root:
-
-```sh
-uv sync --project notebooks --frozen
-uv run --project notebooks --frozen python notebooks/execute.py
-```
-
-The complete `notebooks/` directory also runs without the worker checkout:
+For a local run, install Python 3.11+ and [uv](https://docs.astral.sh/uv/), then:
 
 ```sh
 cd notebooks
-uv sync --frozen
-uv run --frozen python execute.py
+uv sync --locked --extra runner
+uv run --locked --extra runner vgi-notebooks
 ```
 
-Initial setup needs network access for the Python environment, community VGI extension and pinned native worker release. No Rust toolchain, local build, credentials or external dataset is required. Parsing is local, using regex data embedded in the release. Native archives are available for macOS Apple silicon, Linux x86-64/arm64 and Windows x86-64. Notebook execution was verified on macOS Apple silicon.
+The optional `runner` extra supplies the local execution kernel. To register an
+interactive kernel, run `uv run --locked --extra runner python -m ipykernel install
+--user --name vgi-useragent-notebooks --display-name 'VGI User-Agent notebooks'`,
+select it in Jupyter, and restart/run all after changing a parameter.
 
-In VS Code choose `notebooks/.venv/bin/python` and use `notebooks/` as the kernel working directory. For other Jupyter editors, optionally register the environment:
+The visible SQL attaches the published native worker:
+
+```sql
+INSTALL vgi FROM community;
+LOAD vgi;
+ATTACH 'useragent' (TYPE vgi,
+  LOCATION 'github-auto://Query-farm/vgi-useragent@v0.4.0');
+```
+
+First startup fetches the platform binary and verifies its release checksum. The
+regex database is embedded; parsing itself is local, with no Rust installation,
+account, token or service. This example is validated on macOS Apple silicon. The
+shared connection creates an empty temporary SQL-secret directory, disables
+persistent secrets and closes its database and worker at the end.
+
+Change only `EXCLUDE_IDENTIFIED_BOTS` to include known spider signatures:
 
 ```sh
-uv run --project notebooks --frozen python -m ipykernel install --user --name vgi-useragent-notebooks --display-name 'Python (vgi-useragent notebooks)'
+uv run --locked --extra runner vgi-notebooks \
+  --parameters '{"EXCLUDE_IDENTIFIED_BOTS": false}' \
+  --output-dir validation/include-bots
 ```
 
-Restart and run all after editing parameters. Connection and analytical SQL remain expanded; setup, plotting, checks and cleanup source are folded. The saved notebook embeds both charts.
+The selected population changes from 15 to 18 requests and from six to eight
+distinct nonempty strings. The full-input chart and selector comparison stay
+unchanged; field availability keeps all selected requests in its denominator.
+Unknown/missing flags survive either policy. None of these counts identifies
+people, sessions or verified hardware; a false bot flag does not establish a human.
 
-## Experiment
+The shared [standard](https://github.com/Query-farm/vgi-example-notebooks/blob/v0.3.0/docs/standard.md)
+and runner are pinned at **v0.3.0** rather than copied into this repository. Charts
+retain native SVG and content-addressed `charts/` assets for clean GitHub display.
+Experiments retain native SVG in separate copies. Failed execution and invalid
+parameter overrides cannot replace the last successful default. Keep prior chart
+assets so historical notebook image references remain valid.
 
-```sh
-uv run --project notebooks --frozen python notebooks/execute.py \
-  --parameters '{"EXCLUDE_IDENTIFIED_BOTS":false}' \
-  --output-dir notebooks/validation/include-bots
-```
-
-The default excludes only explicit true bot flags. Switching to false includes the identified signatures and changes the reporting denominator; all parsed values and the full header-state audit remain fixed. Reset the parameter to true for the saved example.
-
-The runner requires a separate destination for overrides, rejects unknown parameter names, and saves only successful full executions. Failed runs leave prior saved outputs untouched. Experiment copies include relative branding and runtime companions. Review PNGs and other generated validation files are ignored.
-
-## Portable startup and input provenance
-
-The literal `ATTACH` location is `github-auto://Query-farm/vgi-useragent@v0.4.0`. The VGI extension downloads the platform release, checks its checksum and caches it. The notebook lock pins Haybarn 2.0.0rc11. To upgrade, change the tag explicitly and rerun both settings; the embedded uap-core regex data can change classifications between releases.
-
-All eighteen request rows are synthetic, expanded from ten authored patterns. Familiar browser, curl and crawler strings are illustrative text, not records collected from those services. The worker does not follow the URLs inside the headers. The input includes two Chrome versions, repeated strings, a custom unknown client, an empty string and SQL NULL. There are no user, session or device identifiers.
-
-The dictionary is parsed once per distinct supplied value, including one NULL key; an `IS NOT DISTINCT FROM` join preserves missing-header requests. The input strings are within the worker's 64 KiB matching bound. No completeness claim is made for oversized, spoofed, reduced or future headers.
-
-## Interpretation
-
-Request count and distinct nonempty-string count have different meanings. Multiple requests can reuse one string, and different strings can map to one family. Neither measure counts visitors. Empty and missing buckets contain requests but zero observed nonempty strings. Unknown families remain NULL; missing device/brand fields do not imply desktop hardware.
-
-The worker's bot flag comes from the embedded parser's Spider classification. A false flag on curl or an unknown client is not evidence of a human. Identified spiders deliberately have NULL device/brand fields. A SQL NULL input returns a NULL struct/flag; an empty or unrecognized string returns a struct with unknown string fields and a false flag.
-
-`WHERE NOT is_bot` drops NULL flags along with true flags. The selected view uses `IS DISTINCT FROM true` to retain missing headers without changing their stored values. Browser shares use the selected request denominator, so adding bot signatures can lower other families' shares even when their request counts stay unchanged. Recognition is not verification of what sent the request.
-
-Validation covers the default run (13.6 seconds) and include-bots experiment from a detached notebook directory (2.5 seconds), four rendered charts, eleven SQL invariants plus count/share reconciliation, and three runner failure guards. Including the three bot-signature requests changes selected requests from 15 to 18 and distinct nonempty strings from 6 to 8; the full header-state chart stays identical. Source checks passed: 30 Rust tests, 64 stdio / 68 HTTP / 64 Unix SQL assertions (two cases per transport), Clippy, rustfmt, warning-clean docs and metadata scoring 100/100 L2 with zero findings. Source validation builds the local worker; notebook runs exclusively use the release. Original code, embedded regex data, tests and Cargo files are preserved.
-
-Official Query.Farm Strata Sun and VGI artwork is copied unchanged from the approved assets and linked at the top and bottom.
+[Coverage evidence](coverage.json) records eight of eight public SQL surfaces for
+both release v0.4.0 and the reviewed current-public source revision. Complete
+`duckdb_functions()` / `duckdb_tables()` exports, notebook execution hashes and
+explicit narrative reviews are under `coverage/`. The notebook executes the
+published release; current-source catalog discovery is a separate validation step.
+No authenticated or write surfaces are omitted. New worker releases require a new
+catalog comparison and notebook execution before updating this pin or coverage.
