@@ -56,8 +56,8 @@ unchanged; field availability keeps all selected requests in its denominator.
 Unknown/missing flags survive either policy. None of these counts identifies
 people, sessions or verified hardware; a false bot flag does not establish a human.
 
-The shared [standard](https://github.com/Query-farm/vgi-example-notebooks/blob/v0.3.0/docs/standard.md)
-and runner are pinned at **v0.3.0** rather than copied into this repository. Charts
+The shared [standard](https://github.com/Query-farm/vgi-example-notebooks/blob/v0.3.6/docs/standard.md)
+and runner are pinned at **v0.3.6** rather than copied into this repository. Charts
 retain native SVG and content-addressed `charts/` assets for clean GitHub display.
 Experiments retain native SVG in separate copies. Failed execution and invalid
 parameter overrides cannot replace the last successful default. Keep prior chart
