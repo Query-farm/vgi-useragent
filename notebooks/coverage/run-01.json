@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "notebook_sha256": "a960ba25c2bec5a07d68d0d4c6ef110f24f2d7be15f3405363da3bef07b05371",
+  "notebook_sha256": "fd2b02b10349447ad2143984828b5c2bc2956c23366cfa8767cca98de165cda3",
   "catalog_sha256": "e0191f091107186a7d25346a3396e0cbc74252811232f2b59b1548bc8b3dbe61",
   "worker_revision": "v0.4.0",
   "status": "success",
-  "executed_at": "2026-11-14T18:52:40.648076+00:00",
+  "executed_at": "2026-11-14T19:09:06.233258+00:00",
   "engine": "Haybarn 2.0.0rc11 / VGI e75482339d",
   "command": "uv run --locked --extra runner vgi-notebooks --timeout 300",
   "catalog_aliases": [
@@ -22,7 +22,7 @@
       "id": "shared-install",
       "status": "success",
       "execution_count": 2,
-      "source_sha256": "dadb4d0b253c7510cc9a9835684f99984873dcf4ace79e6aeec701cc17f90347",
+      "source_sha256": "1603c8e681b6edced2e31237d9fb8f78dcb8c88d5748a5daffa4d10911e7ad6f",
       "outputs_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
     },
     {
@@ -152,5 +152,5 @@
       "outputs_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
     }
   ],
-  "presentation_update": "Shared tools0.3.6: linked worker identity/header/footer; analytical code unchanged; whole notebook executed again."
+  "presentation_update": "Shared tools0.3.8: published worker H1 title/subtitle, narrative H2, sections H3; analytical code unchanged; whole notebook executed again."
 }
